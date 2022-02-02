@@ -14,6 +14,28 @@ struct Period {
 }
 
 library Harberger {
+  function getNextPrice(
+    Percentage memory percentage,
+    Period memory period,
+    uint256 price,
+    uint256 buffer
+  ) internal pure returns (int256 remainder, uint256 nextPrice) {
+    uint256 tax = taxPerBlock(percentage, period, price);
+    remainder = int256(buffer) - int256(tax);
+
+    if (remainder >= 0) {
+      nextPrice = price;
+    } else {
+      nextPrice = price - uint256(-1*remainder);
+
+      if (nextPrice < 0) {
+        nextPrice = 0;
+      }
+    }
+
+    return (remainder, nextPrice);
+  }
+
   function taxPerBlock(
     Percentage memory percentage,
     Period memory period,

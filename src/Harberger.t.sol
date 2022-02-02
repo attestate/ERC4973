@@ -6,6 +6,70 @@ import {DSTest} from "ds-test/test.sol";
 import {Harberger, Period, Percentage} from "./Harberger.sol";
 
 contract HarbergerTest is DSTest {
+    function testUsedBuffer() public {
+      Period memory period1 = Period(0, 50);
+      Percentage memory percentage1 = Percentage(1, 100);
+      uint256 price = 1 ether;
+      uint256 buffer = 0.5 ether;
+
+      (int256 remainder, uint256 nextPrice) = Harberger.getNextPrice(
+        percentage1,
+        period1,
+        price,
+        buffer
+      );
+      assertEq(remainder, 0);
+      assertEq(nextPrice, 1 ether);
+    }
+
+    function testLowerPrice() public {
+      Period memory period1 = Period(0, 51);
+      Percentage memory percentage1 = Percentage(1, 100);
+      uint256 price = 1 ether;
+      uint256 buffer = 0.5 ether;
+
+      (int256 remainder, uint256 nextPrice) = Harberger.getNextPrice(
+        percentage1,
+        period1,
+        price,
+        buffer
+      );
+      assertEq(remainder, -0.01 ether);
+      assertEq(nextPrice, 0.99 ether);
+    }
+
+    function testConsumingTotalPrice() public {
+      Period memory period1 = Period(0, 150);
+      Percentage memory percentage1 = Percentage(1, 100);
+      uint256 price = 1 ether;
+      uint256 buffer = 0.5 ether;
+
+      (int256 remainder, uint256 nextPrice) = Harberger.getNextPrice(
+        percentage1,
+        period1,
+        price,
+        buffer
+      );
+      assertEq(remainder, -1 ether);
+      assertEq(nextPrice, 0);
+    }
+
+    function testGettingNextPrice() public {
+      Period memory period1 = Period(0, 1);
+      Percentage memory percentage1 = Percentage(1, 100);
+      uint256 price = 1 ether;
+      uint256 buffer = 0.5 ether;
+
+      (int256 remainder, uint256 nextPrice) = Harberger.getNextPrice(
+        percentage1,
+        period1,
+        price,
+        buffer
+      );
+      assertEq(remainder, 0.49 ether);
+      assertEq(nextPrice, 1 ether);
+    }
+
     function testBlockTax() public {
       Period memory period1 = Period(0, 1);
       Percentage memory percentage1 = Percentage(1, 100);
