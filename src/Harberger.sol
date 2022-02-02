@@ -14,11 +14,11 @@ struct Period {
 }
 
 library Harberger {
-  function taxByBlock(
-    Percentage percentage,
-    Period period,
+  function taxPerBlock(
+    Percentage memory percentage,
+    Period memory period,
     uint256 price
-  ) pure returns (uint256) {
+  ) internal pure returns (uint256) {
     uint256 diff = period.end - period.start;
     return FixedPointMathLib.fdiv(
       price * diff * percentage.numerator,
