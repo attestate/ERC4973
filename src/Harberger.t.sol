@@ -6,6 +6,22 @@ import {DSTest} from "ds-test/test.sol";
 import {Harberger, Period, Percentage} from "./Harberger.sol";
 
 contract HarbergerTest is DSTest {
+    function testPriceZero() public {
+      Period memory period1 = Period(0, 50);
+      Percentage memory percentage1 = Percentage(100, 100);
+
+      uint256 price = 0;
+      uint256 buffer = 0;
+      (int256 remainder, uint256 nextPrice) = Harberger.getNextPrice(
+        percentage1,
+        period1,
+        price,
+        buffer
+      );
+      assertEq(remainder, 0);
+      assertEq(nextPrice, 0);
+    }
+
     function testUsedBuffer() public {
       Period memory period1 = Period(0, 50);
       Percentage memory percentage1 = Percentage(1, 100);
