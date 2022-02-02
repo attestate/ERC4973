@@ -1,17 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.6;
 
-import "ds-test/test.sol";
+import {DSTest} from "ds-test/test.sol";
 
-import "./Libharberger.sol";
+import {Harberger} from "./Harberger.sol";
 
-contract LibharbergerTest is DSTest {
-    Libharberger libharberger;
-
-    function setUp() public {
-        libharberger = new Libharberger();
-    }
-
+contract HarbergerTest is DSTest {
     function testFail_basic_sanity() public {
         assertTrue(false);
     }
