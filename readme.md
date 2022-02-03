@@ -1,6 +1,9 @@
-# libharberger
+<p align="center">
+  <img src="/assets/harbergerschema.jpg" />
+</p>
 
-> A Solidity library to collect Harberger taxes and pricing
+### A dapptools-ready library for charging Harberger taxes on non-fungible property.
+#### [Installation](readme.md/#Installation) | [License](readme.md#License)
 
 ## Installation
 
