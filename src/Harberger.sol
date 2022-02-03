@@ -17,23 +17,16 @@ library Harberger {
   function getNextPrice(
     Percentage memory percentage,
     Period memory period,
-    uint256 price,
-    uint256 buffer
-  ) internal pure returns (int256 remainder, uint256 nextPrice) {
+    uint256 price
+  ) internal pure returns (uint256) {
     uint256 tax = taxPerBlock(percentage, period, price);
-    remainder = int256(buffer) - int256(tax);
+    int256 diff = int256(price) - int256(tax);
 
-    if (remainder >= 0) {
-      nextPrice = price;
+    if (diff <= 0) {
+      return 0;
     } else {
-      nextPrice = price - uint256(-1*remainder);
-
-      if (nextPrice < 0) {
-        nextPrice = 0;
-      }
+      return uint256(diff);
     }
-
-    return (remainder, nextPrice);
   }
 
   function taxPerBlock(

@@ -11,14 +11,11 @@ contract HarbergerTest is DSTest {
       Percentage memory percentage1 = Percentage(100, 100);
 
       uint256 price = 0;
-      uint256 buffer = 0;
-      (int256 remainder, uint256 nextPrice) = Harberger.getNextPrice(
+      uint256 nextPrice = Harberger.getNextPrice(
         percentage1,
         period1,
-        price,
-        buffer
+        price
       );
-      assertEq(remainder, 0);
       assertEq(nextPrice, 0);
     }
 
@@ -26,47 +23,38 @@ contract HarbergerTest is DSTest {
       Period memory period1 = Period(0, 50);
       Percentage memory percentage1 = Percentage(1, 100);
       uint256 price = 1 ether;
-      uint256 buffer = 0.5 ether;
 
-      (int256 remainder, uint256 nextPrice) = Harberger.getNextPrice(
+      uint256 nextPrice = Harberger.getNextPrice(
         percentage1,
         period1,
-        price,
-        buffer
+        price
       );
-      assertEq(remainder, 0);
-      assertEq(nextPrice, 1 ether);
+      assertEq(nextPrice, 0.5 ether);
     }
 
     function testLowerPrice() public {
       Period memory period1 = Period(0, 51);
       Percentage memory percentage1 = Percentage(1, 100);
       uint256 price = 1 ether;
-      uint256 buffer = 0.5 ether;
 
-      (int256 remainder, uint256 nextPrice) = Harberger.getNextPrice(
+      uint256 nextPrice = Harberger.getNextPrice(
         percentage1,
         period1,
-        price,
-        buffer
+        price
       );
-      assertEq(remainder, -0.01 ether);
-      assertEq(nextPrice, 0.99 ether);
+      assertEq(nextPrice, 0.49 ether);
     }
 
     function testConsumingTotalPrice() public {
       Period memory period1 = Period(0, 150);
       Percentage memory percentage1 = Percentage(1, 100);
       uint256 price = 1 ether;
-      uint256 buffer = 0.5 ether;
 
-      (int256 remainder, uint256 nextPrice) = Harberger.getNextPrice(
+      uint256 nextPrice = Harberger.getNextPrice(
         percentage1,
         period1,
-        price,
-        buffer
+        price
       );
-      assertEq(remainder, -1 ether);
       assertEq(nextPrice, 0);
     }
 
@@ -74,16 +62,13 @@ contract HarbergerTest is DSTest {
       Period memory period1 = Period(0, 1);
       Percentage memory percentage1 = Percentage(1, 100);
       uint256 price = 1 ether;
-      uint256 buffer = 0.5 ether;
 
-      (int256 remainder, uint256 nextPrice) = Harberger.getNextPrice(
+      uint256 nextPrice = Harberger.getNextPrice(
         percentage1,
         period1,
-        price,
-        buffer
+        price
       );
-      assertEq(remainder, 0.49 ether);
-      assertEq(nextPrice, 1 ether);
+      assertEq(nextPrice, 0.99 ether);
     }
 
     function testBlockTax() public {
