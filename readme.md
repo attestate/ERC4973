@@ -56,6 +56,16 @@ periodically call a `collectTaxes` method.
 
 ## Changelog
 
+### 0.3.0
+
+- Rename `Percentage` struct to `Perwei`
+- Add further tests to confirm precision of up to 18 decimal points
+
+NOTE: We only noticed now that between 0.0.1 and 0.2.0, we've made a mistake in
+semantic versioning as "0.2.0" should actually be "0.1.0". But we're deciding
+to stick with the mistake and we'll try to properly produce ascending numbers
+in the future.
+
 ### 0.2.0
 
 - Simplify pricing mechanism
