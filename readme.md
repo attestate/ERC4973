@@ -16,13 +16,13 @@ dapp install rugpullindex/libharberger
 ```sol
 pragma solidity ^0.8.6;
 
-import {Harberger, Period, Percentage} from "libharberger/Harberger.sol";
+import {Harberger, Period, Perwei} from "libharberger/Harberger.sol";
 
 function tax() pure {
   uint256 price = 1 ether;
 
   Period period = Period(0, block.number);
-  Percentage taxRate = Percentage(1, 100) // == 0.01
+  Perwei taxRate = Perwei(1, 100) // == 0.01
   uint256 nextPrice = Harberger.getNextPrice(taxRate, period, price);
 
   //...
@@ -46,7 +46,7 @@ implementing the Harberger tax as a periodically reduced price value.
 
 Say you buy property X for price `p_x = 1 ether` at block `b_x`, where `x = 0`,
 then for each block `b_x+1` we reduce `p_x+1` by the tax rate. If say the tax
-rate was `t = 0.01`, then property X' price at block 1 
+rate was `t = 0.01`, then property X price at block 1 
 `b_1` is `p_1 = 1 ether - 1 ether * 0.01 = 0.99 ether` and at 
 `b_2`, `p_2 = 0.99 ether - 0.99 ether * 0.01 = 0.9801 ether` and so on.
 
