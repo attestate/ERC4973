@@ -37,6 +37,39 @@ struct Period {
 }
 
 library Harberger {
+  function pay(
+    Perwei memory perwei,
+    Period memory period,
+    uint256 prevPrice
+  ) internal view returns (uint256 nextPrice) {
+    require(msg.value > 0, "must send eth");
+    nextPrice = Harberger.getNextPrice(perwei, period, prevPrice);
+    require(msg.value > nextPrice, "msg.value too low");
+  }
+
+  function increase(
+    Perwei memory perwei,
+    Period memory period,
+    address owner,
+    uint256 prevPrice
+  ) internal view returns (uint256 nextPrice) {
+    require(msg.value > 0, "must send eth");
+    require(owner == msg.sender, "only owner");
+    nextPrice = Harberger.getNextPrice(perwei, period, prevPrice) + msg.value;
+  }
+
+  function decrease(
+    Perwei memory perwei,
+    Period memory period,
+    uint256 prevPrice,
+    address owner,
+    uint256 amount
+  ) internal view returns (uint256 nextPrice) {
+    require(owner != address(0), "owner is zero addr");
+    require(owner == msg.sender, "only owner");
+    nextPrice = Harberger.getNextPrice(perwei, period, prevPrice) - amount;
+  }
+
   function getNextPrice(
     Perwei memory perwei,
     Period memory period,
