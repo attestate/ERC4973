@@ -44,7 +44,7 @@ library Harberger {
   ) internal view returns (uint256 nextPrice) {
     require(msg.value > 0, "must send eth");
     nextPrice = Harberger.getNextPrice(perwei, period, prevPrice);
-    require(msg.value > nextPrice, "msg.value too low");
+    require(msg.value >= nextPrice, "msg.value too low");
   }
 
   function increase(
