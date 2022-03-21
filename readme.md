@@ -2,13 +2,22 @@
   <img src="/assets/harbergerschema.jpg" />
 </p>
 
-### A dapptools-ready library for charging Harberger taxes on non-fungible property.
+### A dapptools/foundry-ready library for charging Harberger taxes on non-fungible property.
+
 #### [Installation](readme.md/#Installation) | [License](readme.md#License) | [Usage](readme.md#Usage)
 
 ## Installation
 
+With [dapptools](https://github.com/dapphub/dapptools):
+
 ```bash
 dapp install rugpullindex/libharberger
+```
+
+Or [foundry](https://github.com/gakonst/foundry):
+
+```
+forge install rugpullindex/libharberger
 ```
 
 ## Usage
@@ -46,8 +55,8 @@ implementing the Harberger tax as a periodically reduced price value.
 
 Say you buy property X for price `p_x = 1 ether` at block `b_x`, where `x = 0`,
 then for each block `b_x+1` we reduce `p_x+1` by the tax rate. If say the tax
-rate was `t = 0.01`, then property X price at block 1 
-`b_1` is `p_1 = 1 ether - 1 ether * 0.01 = 0.99 ether` and at 
+rate was `t = 0.01`, then property X price at block 1
+`b_1` is `p_1 = 1 ether - 1 ether * 0.01 = 0.99 ether` and at
 `b_2`, `p_2 = 0.99 ether - 0.99 ether * 0.01 = 0.9801 ether` and so on.
 
 We decrease the price in that way until it reaches zero, for when a new buyer
