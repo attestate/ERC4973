@@ -10,3 +10,6 @@
 [submodule "lib/pluralproperty"]
 	path = lib/pluralproperty
 	url = git@github.com:rugpullindex/pluralproperty.git
+[submodule "lib/openzeppelin-contracts"]
+	path = lib/openzeppelin-contracts
+	url = git@github.com:OpenZeppelin/openzeppelin-contracts.git

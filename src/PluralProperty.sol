@@ -12,7 +12,7 @@ struct Offer {
   uint256 tokenId;
 }
 
-contract Auctioneer {
+contract PluralProperty {
   Offer[] private offers;
 
   function create(

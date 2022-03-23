@@ -3,14 +3,14 @@ pragma solidity ^0.8.6;
 
 import {DSTest} from "ds-test/test.sol";
 
-import {Auctioneer} from "./Auctioneer.sol";
+import {PluralProperty} from "./PluralProperty.sol";
 import {Perwei} from "./Harberger.sol";
 
-contract AuctioneerTest is DSTest {
-  Auctioneer a;
+contract PluralPropertyTest is DSTest {
+  PluralProperty p;
 
   function setUp() public {
-    a = new Auctioneer();
+    p = new PluralProperty();
   }
   receive() external payable {}
 
@@ -20,19 +20,19 @@ contract AuctioneerTest is DSTest {
     Perwei memory taxRate = Perwei(1, 100);
     address token = address(1);
     uint256 tokenId = 0;
-    uint256 offerId0 = a.create{value: startPrice}(
+    uint256 offerId0 = p.create{value: startPrice}(
       taxRate,
       token,
       tokenId
     );
 
     uint256 firstBalance = address(this).balance;
-    a.bid{value: 1.1 ether}(offerId0);
+    p.bid{value: 1.1 ether}(offerId0);
     uint256 secondBalance = address(this).balance;
     uint256 endBlock = block.number;
     assertEq(endBlock-startBlock, 0);
     assertEq(firstBalance-secondBalance, 0.1 ether);
-    assertEq(address(a).balance, 1.1 ether);
+    assertEq(address(p).balance, 1.1 ether);
   }
 
   function testFailBidWithFalsePrice() public {
@@ -40,24 +40,24 @@ contract AuctioneerTest is DSTest {
     Perwei memory taxRate = Perwei(1, 100);
     address token = address(1);
     uint256 tokenId = 0;
-    uint256 offerId0 = a.create{value: startPrice}(
+    uint256 offerId0 = p.create{value: startPrice}(
       taxRate,
       token,
       tokenId
     );
 
-    a.bid{value: 0.1 ether}(offerId0);
+    p.bid{value: 0.1 ether}(offerId0);
   }
 
   function testFailBidOnNonExistentOffer() public {
-    a.bid(1337);
+    p.bid(1337);
   }
 
   function testFailCreateOfferWithoutValue() public {
     Perwei memory taxRate = Perwei(1, 100);
     address token = address(1);
     uint256 tokenId = 0;
-    a.create{value: 0}(
+    p.create{value: 0}(
       taxRate,
       token,
       tokenId
@@ -69,13 +69,13 @@ contract AuctioneerTest is DSTest {
     Perwei memory taxRate = Perwei(1, 100);
     address token = address(1);
     uint256 tokenId = 0;
-    uint256 offerId0 = a.create{value: startPrice}(
+    uint256 offerId0 = p.create{value: startPrice}(
       taxRate,
       token,
       tokenId
     );
     assertEq(offerId0, 0);
-    uint256 offerId1 = a.create{value: startPrice}(
+    uint256 offerId1 = p.create{value: startPrice}(
       taxRate,
       token,
       tokenId
