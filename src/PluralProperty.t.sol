@@ -6,81 +6,90 @@ import {DSTest} from "ds-test/test.sol";
 import {PluralProperty} from "./PluralProperty.sol";
 import {Perwei} from "./Harberger.sol";
 
+contract HarbergerProperty is PluralProperty {
+  constructor() PluralProperty("Name", "Symbol") {}
+}
+
+contract Buyer {
+  function proxyBuy(address propAddr,uint256 tokenId) payable public {
+    HarbergerProperty prop = HarbergerProperty(propAddr);
+    prop.buy{value: msg.value}(tokenId);
+  }
+}
+
 contract PluralPropertyTest is DSTest {
-  PluralProperty p;
+  HarbergerProperty prop;
 
   function setUp() public {
-    p = new PluralProperty();
+    prop = new HarbergerProperty();
   }
   receive() external payable {}
 
-  function testBidOnAnOffer() public {
+  function testBuy() public {
     uint256 startBlock = block.number;
     uint256 startPrice = 1 ether;
     Perwei memory taxRate = Perwei(1, 100);
-    address token = address(1);
-    uint256 tokenId = 0;
-    uint256 offerId0 = p.create{value: startPrice}(
+    uint256 tokenId = prop.mint{value: startPrice}(
       taxRate,
-      token,
-      tokenId
+      "https://example.com/metadata.json"
     );
+    assertEq(prop.ownerOf(tokenId), address(this));
 
     uint256 firstBalance = address(this).balance;
-    p.bid{value: 1.1 ether}(offerId0);
+
+    Buyer buyer = new Buyer();
+    buyer.proxyBuy{value: 1.1 ether}(address(prop), tokenId);
+    assertEq(prop.ownerOf(tokenId), address(buyer));
+
     uint256 secondBalance = address(this).balance;
     uint256 endBlock = block.number;
     assertEq(endBlock-startBlock, 0);
     assertEq(firstBalance-secondBalance, 0.1 ether);
-    assertEq(address(p).balance, 1.1 ether);
+    assertEq(address(prop).balance, 1.1 ether);
   }
 
   function testFailBidWithFalsePrice() public {
     uint256 startPrice = 1 ether;
     Perwei memory taxRate = Perwei(1, 100);
-    address token = address(1);
-    uint256 tokenId = 0;
-    uint256 offerId0 = p.create{value: startPrice}(
+    uint256 tokenId0 = prop.mint{value: startPrice}(
       taxRate,
-      token,
-      tokenId
+      "https://example.com/metadata.json"
     );
 
-    p.bid{value: 0.1 ether}(offerId0);
+    Buyer buyer = new Buyer();
+    assertEq(prop.ownerOf(tokenId0), address(this));
+    buyer.proxyBuy{value: 0.1 ether}(address(prop), tokenId0);
+    assertEq(prop.ownerOf(tokenId0), address(this));
   }
 
-  function testFailBidOnNonExistentOffer() public {
-    p.bid(1337);
+  function testFailBuyOnNonExistentProperty() public {
+    prop.buy{value: 1 ether}(1337);
   }
 
-  function testFailCreateOfferWithoutValue() public {
+  function testFailCreatePropertyWithoutValue() public {
     Perwei memory taxRate = Perwei(1, 100);
-    address token = address(1);
-    uint256 tokenId = 0;
-    p.create{value: 0}(
+    string memory uri = "https://example.com/metadata.json";
+    prop.mint{value: 0}(
       taxRate,
-      token,
-      tokenId
+      uri
     );
   }
 
-  function testCreateOffer() public {
+  function testCreateProperty() public {
     uint256 startPrice = 1 ether;
     Perwei memory taxRate = Perwei(1, 100);
-    address token = address(1);
-    uint256 tokenId = 0;
-    uint256 offerId0 = p.create{value: startPrice}(
+    string memory uri = "https://example.com/metadata.json";
+    uint256 tokenId0 = prop.mint{value: startPrice}(
       taxRate,
-      token,
-      tokenId
+      uri
     );
-    assertEq(offerId0, 0);
-    uint256 offerId1 = p.create{value: startPrice}(
+    assertEq(tokenId0, 0);
+
+    uint256 tokenId1 = prop.mint{value: startPrice}(
       taxRate,
-      token,
-      tokenId
+      uri
     );
-    assertEq(offerId1, 1);
+    assertEq(tokenId1, 1);
   }
 }
 
