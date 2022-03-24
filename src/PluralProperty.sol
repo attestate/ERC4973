@@ -52,37 +52,30 @@ abstract contract PluralProperty is ERC165, IERC721Metadata, IPluralProperty {
   }
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-    require(_exists(tokenId), "URI query for nonexistent token");
-
-    string memory baseURI = _baseURI();
-    return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
+    require(_exists(tokenId), "tokenURI: token doesn't exist");
+    return _tokenURIs[tokenId];
   }
 
-  function _baseURI() internal view virtual returns (string memory) {
-    return "";
+  function _setTokenURI(uint256 _tokenId, string memory _tokenURI) internal virtual {
+    require(_exists(_tokenId), "_setTokenURI: token doesn't exist");
+    _tokenURIs[_tokenId] = _tokenURI;
   }
 
   function _exists(uint256 tokenId) internal view virtual returns (bool) {
     return _owners[tokenId] != address(0);
   }
 
-  function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal virtual {
-    require(_exists(tokenId), "URI set of nonexistent token");
-    _tokenURIs[tokenId] = _tokenURI;
-  }
-
   function ownerOf(uint256 tokenId) public view returns (address) {
     address owner = _owners[tokenId];
-    require(owner != address(0), "owner query for nonexistent token");
+    require(owner != address(0), "ownerOf: token doesn't exist");
     return owner;
   }
-
 
   function mint(
     Perwei memory taxRate,
     string calldata uri
   ) external payable returns (uint256) {
-    require(msg.value > 0, "must send eth");
+    require(msg.value > 0, "mint: not enough ETH");
 
     uint256 tokenId = _tokenIds.current();
     _owners[tokenId] = msg.sender;
@@ -105,7 +98,7 @@ abstract contract PluralProperty is ERC165, IERC721Metadata, IPluralProperty {
     uint256 tokenId
   ) external payable {
     Assessment memory assessment = _assessments[tokenId];
-    require(assessment.seller != address(0), "offer doesn't exist");
+    require(_exists(tokenId), "buy: token doesn't exist");
 
     uint256 nextPrice = Harberger.pay(
       assessment.taxRate,

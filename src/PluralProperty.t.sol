@@ -2,7 +2,9 @@
 pragma solidity ^0.8.6;
 
 import {DSTest} from "ds-test/test.sol";
+import {IERC165} from "openzeppelin-contracts/utils/introspection/IERC165.sol";
 
+import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
 import {PluralProperty} from "./PluralProperty.sol";
 import {Perwei} from "./Harberger.sol";
 
@@ -25,7 +27,32 @@ contract PluralPropertyTest is DSTest {
   }
   receive() external payable {}
 
-  function testBuy() public {
+  function testInterfaceCompatability() public {
+    assertTrue(prop.supportsInterface(type(IERC165).interfaceId));
+    assertTrue(prop.supportsInterface(type(IERC721Metadata).interfaceId));
+  }
+
+  function testCheckMetadata() public {
+    assertEq(prop.name(), "Name");
+    assertEq(prop.symbol(), "Symbol");
+
+    string memory tokenURI = "https://example.com/metadata.json";
+    uint256 tokenId = prop.mint{value: 1}(
+      Perwei(0, 0),
+      tokenURI
+    );
+    assertEq(prop.tokenURI(tokenId), tokenURI);
+  }
+
+  function testFailRequestingNonExistentTokenURI() public view {
+    prop.tokenURI(1337);
+  }
+
+  function testFailGetOwnerOfNonExistentTokenId() public view {
+    prop.ownerOf(1337);
+  }
+
+  function testBuyAndChangingOwner() public {
     uint256 startBlock = block.number;
     uint256 startPrice = 1 ether;
     Perwei memory taxRate = Perwei(1, 100);
@@ -48,7 +75,7 @@ contract PluralPropertyTest is DSTest {
     assertEq(address(prop).balance, 1.1 ether);
   }
 
-  function testFailBidWithFalsePrice() public {
+  function testFailBuyWithFalsePrice() public {
     uint256 startPrice = 1 ether;
     Perwei memory taxRate = Perwei(1, 100);
     uint256 tokenId0 = prop.mint{value: startPrice}(
@@ -66,7 +93,11 @@ contract PluralPropertyTest is DSTest {
     prop.buy{value: 1 ether}(1337);
   }
 
-  function testFailCreatePropertyWithoutValue() public {
+  function testFailBuyNonExistentTokenId() public {
+    prop.buy{value: 1 ether}(1337);
+  }
+
+  function testFailMintPropertyWithoutValue() public {
     Perwei memory taxRate = Perwei(1, 100);
     string memory uri = "https://example.com/metadata.json";
     prop.mint{value: 0}(
@@ -75,7 +106,11 @@ contract PluralPropertyTest is DSTest {
     );
   }
 
-  function testCreateProperty() public {
+  function testFailMintWithoutValue() public {
+    prop.mint(Perwei(0, 0), "https://example.com/metadata.json");
+  }
+
+  function testMintProperty() public {
     uint256 startPrice = 1 ether;
     Perwei memory taxRate = Perwei(1, 100);
     string memory uri = "https://example.com/metadata.json";
