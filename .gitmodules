@@ -1,15 +1,6 @@
 [submodule "lib/ds-test"]
 	path = lib/ds-test
 	url = https://github.com/dapphub/ds-test
-[submodule "lib/solmate"]
-	path = lib/solmate
-	url = https://github.com/rari-capital/solmate
-[submodule "lib/ds-token"]
-	path = lib/ds-token
-	url = https://github.com/dapphub/ds-token
-[submodule "lib/pluralproperty"]
-	path = lib/pluralproperty
-	url = git@github.com:rugpullindex/pluralproperty.git
 [submodule "lib/openzeppelin-contracts"]
 	path = lib/openzeppelin-contracts
 	url = git@github.com:OpenZeppelin/openzeppelin-contracts.git
