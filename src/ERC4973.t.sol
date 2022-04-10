@@ -5,11 +5,11 @@ import {DSTest} from "ds-test/test.sol";
 import {IERC165} from "openzeppelin-contracts/utils/introspection/IERC165.sol";
 
 import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
-import {IERC1238} from "./interfaces/IERC1238.sol";
-import {ERC1238} from "./ERC1238.sol";
+import {IERC4973} from "./interfaces/IERC4973.sol";
+import {ERC4973} from "./ERC4973.sol";
 
-contract SoulboundToken is ERC1238 {
-  constructor() ERC1238("Name", "Symbol") {}
+contract SoulboundToken is ERC4973 {
+  constructor() ERC4973("Name", "Symbol") {}
 
   function mint(
     string calldata uri
@@ -22,7 +22,7 @@ contract SoulboundToken is ERC1238 {
   }
 }
 
-contract ERC1238Test is DSTest {
+contract ERC4973Test is DSTest {
   SoulboundToken sbt;
 
   function setUp() public {
@@ -37,8 +37,10 @@ contract ERC1238Test is DSTest {
     assertTrue(sbt.supportsInterface(type(IERC721Metadata).interfaceId));
   }
 
-  function testIERC1238() public {
-    assertTrue(sbt.supportsInterface(type(IERC1238).interfaceId));
+  function testIERC4973() public {
+    assertTrue(sbt.supportsInterface(type(IERC4973).interfaceId));
+    assertEq(type(IERC4973).interfaceId, 0x6352211e00000000000000000000000000000000000000000000000000000000);
+
   }
 
   function testCheckMetadata() public {
@@ -56,7 +58,7 @@ contract ERC1238Test is DSTest {
     string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = sbt.mint(tokenURI);
     assertEq(sbt.tokenURI(tokenId), tokenURI);
-    assertEq(sbt.boundTo(tokenId), address(this));
+    assertEq(sbt.ownerOf(tokenId), address(this));
     sbt.burn(tokenId);
   }
 
@@ -65,7 +67,7 @@ contract ERC1238Test is DSTest {
   }
 
   function testFailGetBonderOfNonExistentTokenId() public view {
-    sbt.boundTo(1337);
+    sbt.ownerOf(1337);
   }
 }
 

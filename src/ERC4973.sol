@@ -5,10 +5,10 @@ import {ERC165} from "openzeppelin-contracts/utils/introspection/ERC165.sol";
 import {Counters} from "openzeppelin-contracts/utils/Counters.sol";
 
 import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
-import {IERC1238} from "./interfaces/IERC1238.sol";
+import {IERC4973} from "./interfaces/IERC4973.sol";
 
 
-abstract contract ERC1238 is ERC165, IERC721Metadata, IERC1238 {
+abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
   using Counters for Counters.Counter;
 
   Counters.Counter private _tokenIds;
@@ -29,7 +29,7 @@ abstract contract ERC1238 is ERC165, IERC721Metadata, IERC1238 {
   function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
     return
       interfaceId == type(IERC721Metadata).interfaceId ||
-      interfaceId == type(IERC1238).interfaceId ||
+      interfaceId == type(IERC4973).interfaceId ||
       super.supportsInterface(interfaceId);
   }
 
@@ -50,9 +50,9 @@ abstract contract ERC1238 is ERC165, IERC721Metadata, IERC1238 {
     return _bonds[tokenId] != address(0);
   }
 
-  function boundTo(uint256 tokenId) public view virtual returns (address) {
+  function ownerOf(uint256 tokenId) public view virtual returns (address) {
     address owner = _bonds[tokenId];
-    require(owner != address(0), "boundTo: token doesn't exist");
+    require(owner != address(0), "ownerOf: token doesn't exist");
     return owner;
   }
 
@@ -63,16 +63,16 @@ abstract contract ERC1238 is ERC165, IERC721Metadata, IERC1238 {
     _bonds[tokenId] = msg.sender;
     _tokenURIs[tokenId] = uri;
     _tokenIds.increment();
-    emit Bond(address(0), msg.sender, tokenId);
+    emit Transfer(address(0), msg.sender, tokenId);
     return tokenId;
   }
 
   function _burn(uint256 tokenId) internal virtual {
-    address owner  = boundTo(tokenId);
+    address owner  = ownerOf(tokenId);
 
     delete _bonds[tokenId];
     delete _tokenURIs[tokenId];
 
-    emit Bond(owner, address(0), tokenId);
+    emit Transfer(owner, address(0), tokenId);
   }
 }
