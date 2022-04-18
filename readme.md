@@ -1,14 +1,7 @@
-# SoulboundToken Reference Implementation
+# Non-Transferrable Non-Fungible Account-bound Tokens (formerly Soulbound Tokens or "Badges")
 
-An [ERC721Metadata](https://eips.ethereum.org/EIPS/eip-721) (interfaceId:
-`0x5b5e139f`) compliant, non-transferrable or
-"[Soulbound](https://vitalik.ca/general/2022/01/26/soulbound.html)" token.
-
-## Changelog
-
-### 0.0.1
-
-- Initial release
+Testable implementation of
+[EIP-4973](https://github.com/ethereum/EIPs/pull/4973).
 
 ## License
 
