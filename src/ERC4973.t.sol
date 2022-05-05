@@ -39,7 +39,6 @@ contract ERC4973Test is DSTest {
 
   function testIERC4973() public {
     assertTrue(abt.supportsInterface(type(IERC4973).interfaceId));
-    assertEq(type(IERC4973).interfaceId, 0x0);
   }
 
   function testCheckMetadata() public {
