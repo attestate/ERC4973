@@ -12,9 +12,10 @@ contract AccountBoundToken is ERC4973 {
   constructor() ERC4973("Name", "Symbol") {}
 
   function mint(
+    address to,
     string calldata uri
   ) external returns (uint256) {
-    return super._mint(uri);
+    return super._mint(to, uri);
   }
 
   function burn(uint256 tokenId) external {
@@ -48,15 +49,24 @@ contract ERC4973Test is DSTest {
 
   function testMint() public {
     string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = abt.mint(tokenURI);
+    uint256 tokenId = abt.mint(msg.sender, tokenURI);
     assertEq(abt.tokenURI(tokenId), tokenURI);
+    assertEq(abt.ownerOf(tokenId), msg.sender);
+  }
+
+  function testMintToExternalAddress() public {
+    address thirdparty = address(1337);
+    string memory tokenURI = "https://example.com/metadata.json";
+    uint256 tokenId = abt.mint(thirdparty, tokenURI);
+    assertEq(abt.tokenURI(tokenId), tokenURI);
+    assertEq(abt.ownerOf(tokenId), thirdparty);
   }
 
   function testMintAndBurn() public {
     string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = abt.mint(tokenURI);
+    uint256 tokenId = abt.mint(msg.sender, tokenURI);
     assertEq(abt.tokenURI(tokenId), tokenURI);
-    assertEq(abt.ownerOf(tokenId), address(this));
+    assertEq(abt.ownerOf(tokenId), msg.sender);
     abt.burn(tokenId);
   }
 

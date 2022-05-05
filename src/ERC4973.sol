@@ -57,13 +57,14 @@ abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
   }
 
   function _mint(
+    address to,
     string calldata uri
   ) internal virtual returns (uint256) {
     uint256 tokenId = _tokenIds.current();
-    _owners[tokenId] = msg.sender;
+    _owners[tokenId] = to;
     _tokenURIs[tokenId] = uri;
     _tokenIds.increment();
-    emit Transfer(address(0), msg.sender, tokenId);
+    emit Transfer(address(0), to, tokenId);
     return tokenId;
   }
 
