@@ -2,7 +2,7 @@
 pragma solidity ^0.8.6;
 
 import {DSTest} from "ds-test/test.sol";
-import {IERC165} from "openzeppelin-contracts/utils/introspection/IERC165.sol";
+import {IERC165} from "./interfaces/IERC165.sol";
 
 import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
 import {IERC4973} from "./interfaces/IERC4973.sol";
@@ -13,9 +13,10 @@ contract AccountBoundToken is ERC4973 {
 
   function mint(
     address to,
+    uint256 tokenId,
     string calldata uri
   ) external returns (uint256) {
-    return super._mint(to, uri);
+    return super._mint(to, tokenId, uri);
   }
 
   function burn(uint256 tokenId) external {
@@ -49,7 +50,8 @@ contract ERC4973Test is DSTest {
 
   function testMint() public {
     string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = abt.mint(msg.sender, tokenURI);
+    uint256 tokenId = 0;
+    abt.mint(msg.sender, tokenId, tokenURI);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), msg.sender);
   }
@@ -57,17 +59,28 @@ contract ERC4973Test is DSTest {
   function testMintToExternalAddress() public {
     address thirdparty = address(1337);
     string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = abt.mint(thirdparty, tokenURI);
+    uint256 tokenId = 0;
+    abt.mint(thirdparty, tokenId, tokenURI);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), thirdparty);
   }
 
   function testMintAndBurn() public {
     string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = abt.mint(msg.sender, tokenURI);
+    uint256 tokenId = 0;
+    abt.mint(msg.sender, tokenId, tokenURI);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), msg.sender);
     abt.burn(tokenId);
+  }
+
+  function testFailToMintTokenToPreexistingTokenId() public {
+    string memory tokenURI = "https://example.com/metadata.json";
+    uint256 tokenId = 0;
+    abt.mint(msg.sender, tokenId, tokenURI);
+    assertEq(abt.tokenURI(tokenId), tokenURI);
+    assertEq(abt.ownerOf(tokenId), msg.sender);
+    abt.mint(msg.sender, tokenId, tokenURI);
   }
 
   function testFailRequestingNonExistentTokenURI() public view {

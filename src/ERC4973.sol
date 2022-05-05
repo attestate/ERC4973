@@ -1,17 +1,13 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.6;
 
-import {ERC165} from "openzeppelin-contracts/utils/introspection/ERC165.sol";
-import {Counters} from "openzeppelin-contracts/utils/Counters.sol";
+import {ERC165} from "./ERC165.sol";
 
 import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
 import {IERC4973} from "./interfaces/IERC4973.sol";
 
 
 abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
-  using Counters for Counters.Counter;
-
-  Counters.Counter private _tokenIds;
   string private _name;
   string private _symbol;
 
@@ -58,12 +54,12 @@ abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
 
   function _mint(
     address to,
+    uint256 tokenId,
     string calldata uri
   ) internal virtual returns (uint256) {
-    uint256 tokenId = _tokenIds.current();
+    require(!_exists(tokenId), "mint: tokenID exists");
     _owners[tokenId] = to;
     _tokenURIs[tokenId] = uri;
-    _tokenIds.increment();
     emit Transfer(address(0), to, tokenId);
     return tokenId;
   }
