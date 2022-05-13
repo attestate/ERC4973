@@ -55,7 +55,7 @@ abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
   function _mint(
     address to,
     uint256 tokenId,
-    string calldata uri
+    string memory uri
   ) internal virtual returns (uint256) {
     require(!_exists(tokenId), "mint: tokenID exists");
     _owners[tokenId] = to;
