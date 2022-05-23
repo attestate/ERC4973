@@ -60,7 +60,7 @@ abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
     require(!_exists(tokenId), "mint: tokenID exists");
     _owners[tokenId] = to;
     _tokenURIs[tokenId] = uri;
-    emit Attest(to, tokenId);
+    emit Transfer(msg.sender, to, tokenId);
     return tokenId;
   }
 
@@ -70,6 +70,6 @@ abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
     delete _owners[tokenId];
     delete _tokenURIs[tokenId];
 
-    emit Revoke(owner, tokenId);
+    emit Transfer(owner, address(0), tokenId);
   }
 }
