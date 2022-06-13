@@ -18,13 +18,16 @@ contract AccountBoundToken is ERC4973 {
   ) external returns (uint256) {
     return super._mint(to, tokenId, uri);
   }
+}
 
-  function burn(uint256 tokenId) external {
-    super._burn(tokenId);
+contract NonAuthorizedCaller {
+  function burn(address collection, uint256 tokenId) external {
+    AccountBoundToken abt = AccountBoundToken(collection);
+    abt.burn(tokenId);
   }
 }
 
-contract ERC4973Test is DSTest {
+contract ERC4973Test is Test {
   AccountBoundToken abt;
 
   function setUp() public {
