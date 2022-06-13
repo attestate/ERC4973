@@ -71,10 +71,39 @@ contract ERC4973Test is Test {
   function testMintAndBurn() public {
     string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
-    abt.mint(msg.sender, tokenId, tokenURI);
+    address to = address(this);
+    abt.mint(to, tokenId, tokenURI);
+    assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
-    assertEq(abt.ownerOf(tokenId), msg.sender);
     abt.burn(tokenId);
+  }
+
+  function testBurnAsNonAuthorizedAccount() public {
+    string memory tokenURI = "https://example.com/metadata.json";
+    uint256 tokenId = 0;
+    address to = address(this);
+    abt.mint(to, tokenId, tokenURI);
+    assertEq(abt.ownerOf(tokenId), to);
+    assertEq(abt.tokenURI(tokenId), tokenURI);
+
+    NonAuthorizedCaller nac = new NonAuthorizedCaller();
+    vm.expectRevert(bytes("burn: sender must be owner"));
+
+    nac.burn(address(abt), tokenId);
+  }
+
+  function testBurnNonExistentTokenId() public {
+    string memory tokenURI = "https://example.com/metadata.json";
+    uint256 tokenId = 0;
+    address to = address(this);
+    abt.mint(to, tokenId, tokenURI);
+    assertEq(abt.ownerOf(tokenId), to);
+    assertEq(abt.tokenURI(tokenId), tokenURI);
+
+    NonAuthorizedCaller nac = new NonAuthorizedCaller();
+    vm.expectRevert(bytes("ownerOf: token doesn't exist"));
+
+    nac.burn(address(abt), 1337);
   }
 
   function testFailToMintTokenToPreexistingTokenId() public {
