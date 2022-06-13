@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.6;
 
-import {DSTest} from "ds-test/test.sol";
+import "forge-std/Test.sol";
 import {IERC165} from "./interfaces/IERC165.sol";
 
 import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
