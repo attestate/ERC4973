@@ -15,7 +15,7 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
   mapping(uint256 => string) private _tokenURIs;
 
   constructor(
-    string memory name_, 
+    string memory name_,
     string memory symbol_
   ) ERC4973Permit(name_) {
     _name = name_;
@@ -38,8 +38,7 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
     return _symbol;
   }
 
-  function tokenURI(uint256 tokenId) public view virtual override
-    returns (string memory)
+  function tokenURI(uint256 tokenId) public view virtual override returns (string memory)
   {
     require(_exists(tokenId), "tokenURI: token doesn't exist");
     return _tokenURIs[tokenId];
