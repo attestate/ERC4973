@@ -18,6 +18,26 @@ contract AccountBoundToken is ERC4973 {
   ) external returns (uint256) {
     return super._mint(to, tokenId, uri);
   }
+
+  function mintWithPermission(
+    address from,
+    address to,
+    uint256 tokenId,
+    string memory uri,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external returns (uint256) {
+    return super._mintWithPermission(from, to, tokenId, uri, v, r, s);
+  }
+
+  function getMintPermitMessageHash(
+    address from,
+    address to,
+    string memory tokenURI
+    ) external view returns (bytes32) {
+    return _getMintPermitMessageHash(from, to, tokenURI);
+  }
 }
 
 contract NonAuthorizedCaller {
@@ -30,8 +50,11 @@ contract NonAuthorizedCaller {
 contract ERC4973Test is Test {
   AccountBoundToken abt;
 
+  address fromAddress = 0x0f6A79A579658E401E0B81c6dde1F2cd51d97176;
+  uint256 fromPrivateKey = 0xad54bdeade5537fb0a553190159783e45d02d316a992db05cbed606d3ca36b39;
+
   function setUp() public {
-    abt = new AccountBoundToken();
+    abt = new AccountBoundToken();    
   }
 
   function testIERC165() public {
@@ -76,6 +99,35 @@ contract ERC4973Test is Test {
     assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     abt.burn(tokenId);
+  }
+
+  function testMintWithPermission() public {
+    address from = address(fromAddress);
+    address to = address(this);
+    string memory tokenURI = "https://example.com/metadata.json";
+    uint256 tokenId = 0;
+    bytes32 hash = abt.getMintPermitMessageHash(from, to, tokenURI);
+    (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
+    
+    abt.mintWithPermission(from, to, tokenId, tokenURI, v, r, s);
+
+    assertEq(abt.ownerOf(tokenId), to);
+    assertEq(abt.tokenURI(tokenId), tokenURI);
+  }
+
+  function testFailMintWithoutPermission() public {
+    address from = address(fromAddress);
+    address to = address(this);
+    string memory tokenURI = "https://example.com/metadata.json";
+    uint256 tokenId = 10;
+    bytes32 hash = abt.getMintPermitMessageHash(from, to, tokenURI);
+    (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
+    
+    address unauthorizedTo = address(0);
+    
+    vm.expectRevert("_mintWithPermission: unauthorized caller");
+    abt.mintWithPermission(from, unauthorizedTo, tokenId, tokenURI, v, r, s);
+    assertTrue(abt.ownerOf(tokenId) != to);
   }
 
   function testBurnAsNonAuthorizedAccount() public {
