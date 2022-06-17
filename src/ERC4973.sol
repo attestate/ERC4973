@@ -14,21 +14,20 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
   mapping(uint256 => address) private _owners;
   mapping(uint256 => string) private _tokenURIs;
 
-  constructor(string memory name_, string memory symbol_) ERC4973Permit(name_) {
+  constructor(
+    string memory name_, 
+    string memory symbol_
+  ) ERC4973Permit(name_) {
     _name = name_;
     _symbol = symbol_;
   }
 
-  function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    override
-    returns (bool)
+  function supportsInterface(bytes4 interfaceId) public view override returns (bool)
   {
     return
-        interfaceId == type(IERC721Metadata).interfaceId ||
-        interfaceId == type(IERC4973).interfaceId ||
-        super.supportsInterface(interfaceId);
+      interfaceId == type(IERC721Metadata).interfaceId ||
+      interfaceId == type(IERC4973).interfaceId ||
+      super.supportsInterface(interfaceId);
   }
 
   function name() public view virtual override returns (string memory) {
@@ -39,11 +38,7 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
     return _symbol;
   }
 
-  function tokenURI(uint256 tokenId)
-    public
-    view
-    virtual
-    override
+  function tokenURI(uint256 tokenId) public view virtual override
     returns (string memory)
   {
     require(_exists(tokenId), "tokenURI: token doesn't exist");
@@ -66,9 +61,9 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
   }
 
   function _mint(
-      address to,
-      uint256 tokenId,
-      string memory uri
+    address to,
+    uint256 tokenId,
+    string memory uri
   ) internal virtual returns (uint256) {
     require(!_exists(tokenId), "mint: tokenID exists");
     _owners[tokenId] = to;

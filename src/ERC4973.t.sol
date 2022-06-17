@@ -54,7 +54,7 @@ contract ERC4973Test is Test {
   uint256 fromPrivateKey = 0xad54bdeade5537fb0a553190159783e45d02d316a992db05cbed606d3ca36b39;
 
   function setUp() public {
-    abt = new AccountBoundToken();    
+    abt = new AccountBoundToken();
   }
 
   function testIERC165() public {
