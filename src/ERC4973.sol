@@ -43,9 +43,9 @@ abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
     return _tokenURIs[tokenId];
   }
 
-  function burn(uint256 _tokenId) public virtual override {
-    require(msg.sender == ownerOf(_tokenId), "burn: sender must be owner");
-    _burn(_tokenId);
+  function burn(uint256 tokenId) public virtual override {
+    require(msg.sender == ownerOf(tokenId), "burn: sender must be owner");
+    _burn(tokenId);
   }
 
   function balanceOf(address owner) public view virtual override returns (uint256) {
