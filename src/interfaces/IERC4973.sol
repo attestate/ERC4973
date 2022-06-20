@@ -3,7 +3,7 @@ pragma solidity ^0.8.6;
 
 /// @title Account-bound tokens
 /// @dev See https://eips.ethereum.org/EIPS/eip-4973
-///  Note: the ERC-165 identifier for this interface is 0x6352211e.
+///  Note: the ERC-165 identifier for this interface is 0x5164cf47.
 interface IERC4973 /* is ERC165, ERC721Metadata */ {
   /// @dev This emits when a new token is created and bound to an account by
   /// any mechanism.
@@ -15,6 +15,12 @@ interface IERC4973 /* is ERC165, ERC721Metadata */ {
   /// Note: For a reliable `_from` parameter, retrieve the transaction's
   /// authenticated `from` field.
   event Revoke(address indexed _to, uint256 indexed _tokenId);
+  /// @notice Count all ABTs assigned to an owner
+  /// @dev ABTs assigned to the zero address are considered invalid, and this
+  ///  function throws for queries about the zero address.
+  /// @param _owner An address for whom to query the balance
+  /// @return The number of ABTs owned by `_owner`, possibly zero
+  function balanceOf(address _owner) external view returns (uint256);
   /// @notice Find the address bound to an ERC4973 account-bound token
   /// @dev ABTs assigned to zero address are considered invalid, and queries
   ///  about them do throw.
