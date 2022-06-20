@@ -7,12 +7,16 @@ import {ERC4973Permit} from "./ERC4973Permit.sol";
 import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
 import {IERC4973} from "./interfaces/IERC4973.sol";
 
+
+/// @notice Reference implementation of EIP-4973 tokens.
+/// @author TimDaub (https://github.com/rugpullindex/ERC4973/blob/master/src/ERC4973.sol)
 abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
   string private _name;
   string private _symbol;
 
   mapping(uint256 => address) private _owners;
   mapping(uint256 => string) private _tokenURIs;
+  mapping(address => uint256) private _balances;
 
   constructor(
     string memory name_,
@@ -44,10 +48,16 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
     return _tokenURIs[tokenId];
   }
 
-  function burn(uint256 _tokenId) public virtual override {
-    require(msg.sender == ownerOf(_tokenId), "burn: sender must be owner");
-    _burn(_tokenId);
+  function burn(uint256 tokenId) public virtual override {
+    require(msg.sender == ownerOf(tokenId), "burn: sender must be owner");
+    _burn(tokenId);
   }
+
+  function balanceOf(address owner) public view virtual override returns (uint256) {
+    require(owner != address(0), "balanceOf: address zero is not a valid owner");
+    return _balances[owner];
+  }
+
 
   function ownerOf(uint256 tokenId) public view virtual returns (address) {
     address owner = _owners[tokenId];
@@ -65,6 +75,7 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
     string memory uri
   ) internal virtual returns (uint256) {
     require(!_exists(tokenId), "mint: tokenID exists");
+    _balances[to] += 1;
     _owners[tokenId] = to;
     _tokenURIs[tokenId] = uri;
     emit Attest(to, tokenId);
@@ -74,6 +85,7 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
   function _burn(uint256 tokenId) internal virtual {
     address owner = ownerOf(tokenId);
 
+    _balances[owner] -= 1;
     delete _owners[tokenId];
     delete _tokenURIs[tokenId];
 

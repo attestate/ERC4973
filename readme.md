@@ -6,7 +6,7 @@ Testable implementation of
 ## Communication
 
 - Non-formal communication can happen across all communication channels, e.g.,
-  our ["Account-bound token" TG channel](https://t.me/account_bound_tokens)
+  our ["Account-bound token" TG channel](https://t.me/eip4973)
 - A lot of discussion about "Soulbound tokens" is happening on the
   [RadicalExchange](https://www.radicalxchange.org/) Discord server.
 - [Otterspace](https://www.otterspace.xyz/) is committing a significant portion

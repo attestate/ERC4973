@@ -65,12 +65,43 @@ contract ERC4973Test is Test {
   }
 
   function testIERC4973() public {
-    assertTrue(abt.supportsInterface(type(IERC4973).interfaceId));
+    bytes4 interfaceId = type(IERC4973).interfaceId;
+    assertEq(interfaceId, bytes4(0x5164cf47));
+    assertTrue(abt.supportsInterface(interfaceId));
   }
 
   function testCheckMetadata() public {
     assertEq(abt.name(), "Name");
     assertEq(abt.symbol(), "Symbol");
+  }
+
+  function testIfEmptyAddressReturnsBalanceZero() public {
+    assertEq(abt.balanceOf(address(1337)), 0);
+  }
+
+  function testThrowOnZeroAddress() public {
+    vm.expectRevert(bytes("balanceOf: address zero is not a valid owner"));
+    abt.balanceOf(address(0));
+  }
+
+  function testBalanceIncreaseAfterMint() public {
+    address to = msg.sender;
+    assertEq(abt.balanceOf(to), 0);
+    string memory tokenURI = "https://example.com/metadata.json";
+    uint256 tokenId = 0;
+    abt.mint(to, tokenId, tokenURI);
+    assertEq(abt.balanceOf(to), 1);
+  }
+
+  function testBalanceIncreaseAfterMintAndBurn() public {
+    address to = address(this);
+    assertEq(abt.balanceOf(to), 0);
+    string memory tokenURI = "https://example.com/metadata.json";
+    uint256 tokenId = 0;
+    abt.mint(to, tokenId, tokenURI);
+    assertEq(abt.balanceOf(to), 1);
+    abt.burn(tokenId);
+    assertEq(abt.balanceOf(to), 0);
   }
 
   function testMint() public {
