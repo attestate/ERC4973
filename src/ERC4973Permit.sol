@@ -11,12 +11,12 @@ abstract contract ERC4973Permit is EIP712 {
             "MintPermit(address from,address to,string tokenURI)"
         );
 
-    constructor(string memory name) EIP712(name, "1") {}
+    constructor(string memory name, string memory version) EIP712(name, version) {}
 
     function _getMintPermitMessageHash(
         address from,
         address to,
-        string memory tokenURI
+        string calldata tokenURI
     ) internal view returns (bytes32) {
         bytes32 structHash = keccak256(
             abi.encode(MINT_PERMIT_TYPEHASH, from, to, tokenURI)
@@ -28,7 +28,7 @@ abstract contract ERC4973Permit is EIP712 {
     function _isPermittedToMint(
         address from,
         address to,
-        string memory tokenURI,
+        string calldata tokenURI,
         uint8 v,
         bytes32 r,
         bytes32 s

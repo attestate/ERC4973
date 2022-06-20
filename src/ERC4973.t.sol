@@ -20,21 +20,20 @@ contract AccountBoundToken is ERC4973 {
   }
 
   function mintWithPermission(
-    address from,
     address to,
     uint256 tokenId,
-    string memory uri,
+    string calldata uri,
     uint8 v,
     bytes32 r,
     bytes32 s
   ) external returns (uint256) {
-    return super._mintWithPermission(from, to, tokenId, uri, v, r, s);
+    return super._mintWithPermission(to, tokenId, uri, v, r, s);
   }
 
   function getMintPermitMessageHash(
     address from,
     address to,
-    string memory tokenURI
+    string calldata tokenURI
     ) external view returns (bytes32) {
     return _getMintPermitMessageHash(from, to, tokenURI);
   }
@@ -109,7 +108,10 @@ contract ERC4973Test is Test {
     bytes32 hash = abt.getMintPermitMessageHash(from, to, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
     
-    abt.mintWithPermission(from, to, tokenId, tokenURI, v, r, s);
+    // console.log(msg.sender);
+    // console.log(from);
+    vm.prank(from);
+    abt.mintWithPermission(to, tokenId, tokenURI, v, r, s);
 
     assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
@@ -122,12 +124,10 @@ contract ERC4973Test is Test {
     uint256 tokenId = 10;
     bytes32 hash = abt.getMintPermitMessageHash(from, to, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
-    
-    address unauthorizedTo = address(0);
-    
-    vm.expectRevert("_mintWithPermission: unauthorized caller");
-    abt.mintWithPermission(from, unauthorizedTo, tokenId, tokenURI, v, r, s);
-    assertTrue(abt.ownerOf(tokenId) != to);
+
+    address unauthorizedFrom = address(1);
+    vm.prank(unauthorizedFrom);
+    abt.mintWithPermission(to, tokenId, tokenURI, v, r, s);
   }
 
   function testBurnAsNonAuthorizedAccount() public {

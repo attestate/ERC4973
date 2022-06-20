@@ -17,7 +17,7 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
   constructor(
     string memory name_,
     string memory symbol_
-  ) ERC4973Permit(name_) {
+  ) ERC4973Permit(name_, "1") {
     _name = name_;
     _symbol = symbol_;
   }
@@ -81,15 +81,14 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
   }
 
   function _mintWithPermission(
-    address from,
     address to,
     uint256 tokenId,
-    string memory uri,
+    string calldata uri,
     uint8 v,
     bytes32 r,
     bytes32 s
   ) internal virtual returns (uint256) {
-    require(!_isPermittedToMint(from, to, uri, v, r, s), "_mintWithPermission: unauthorized caller");
+    require(_isPermittedToMint(msg.sender, to, uri, v, r, s), "_mintWithPermission: unauthorized caller");
 
     return _mint(to, tokenId, uri);
   }
