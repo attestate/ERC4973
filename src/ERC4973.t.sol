@@ -138,7 +138,7 @@ contract ERC4973Test is Test {
     uint256 tokenId = 0;
     bytes32 hash = abt.getMintPermitMessageHash(from, to, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
-    
+
     // console.log(msg.sender);
     // console.log(from);
     vm.prank(from);

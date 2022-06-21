@@ -26,8 +26,7 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
     _symbol = symbol_;
   }
 
-  function supportsInterface(bytes4 interfaceId) public view override returns (bool)
-  {
+  function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
     return
       interfaceId == type(IERC721Metadata).interfaceId ||
       interfaceId == type(IERC4973).interfaceId ||
@@ -42,8 +41,7 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
     return _symbol;
   }
 
-  function tokenURI(uint256 tokenId) public view virtual override returns (string memory)
-  {
+  function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
     require(_exists(tokenId), "tokenURI: token doesn't exist");
     return _tokenURIs[tokenId];
   }
@@ -100,7 +98,10 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
     bytes32 r,
     bytes32 s
   ) internal virtual returns (uint256) {
-    require(_isPermittedToMint(msg.sender, to, uri, v, r, s), "_mintWithPermission: unauthorized caller");
+    require(
+      _isPermittedToMint(msg.sender, to, uri, v, r, s),
+      "_mintWithPermission: unauthorized caller"
+    );
 
     return _mint(to, tokenId, uri);
   }
