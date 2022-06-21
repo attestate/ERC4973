@@ -139,10 +139,8 @@ contract ERC4973Test is Test {
     bytes32 hash = abt.getMintPermitMessageHash(from, to, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
     
-    // console.log(msg.sender);
-    // console.log(from);
-    vm.prank(from);
-    abt.mintWithPermission(to, tokenId, tokenURI, v, r, s);
+    vm.prank(to);
+    abt.mintWithPermission(from, tokenId, tokenURI, v, r, s);
 
     assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
