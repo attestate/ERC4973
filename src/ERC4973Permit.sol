@@ -6,6 +6,8 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/draft-EIP712.so
 
 import {ERC4973} from "./ERC4973.sol";
 
+/// @notice Reference implementation of ERC4973Permit
+/// @author Rahul Rumalla, Tim Daub
 abstract contract ERC4973Permit is ERC4973, EIP712 {
   bytes32 private constant MINT_PERMIT_TYPEHASH =
     keccak256(
