@@ -9,7 +9,7 @@ import {IERC4973} from "./interfaces/IERC4973.sol";
 import {ERC4973} from "./ERC4973.sol";
 
 contract AccountBoundToken is ERC4973 {
-  constructor() ERC4973("Name", "Symbol") {}
+  constructor() ERC4973("Name", "Symbol", "Version") {}
 
   function mint(
     address to,

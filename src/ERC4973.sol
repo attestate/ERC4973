@@ -20,8 +20,9 @@ abstract contract ERC4973 is ERC165, ERC4973Permit, IERC721Metadata, IERC4973 {
 
   constructor(
     string memory name_,
-    string memory symbol_
-  ) ERC4973Permit(name_, "1") {
+    string memory symbol_,
+    string memory version_
+  ) ERC4973Permit(name_, version_) {
     _name = name_;
     _symbol = symbol_;
   }
