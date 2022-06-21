@@ -37,7 +37,7 @@ abstract contract ERC4973Permit is EIP712 {
       to,
       tokenURI
     );
-    address approver = ECDSA.recover(mintPermitHash, v, r, s);
-    return approver == from;
+    address signer = ECDSA.recover(mintPermitHash, v, r, s);
+    return signer == from;
   }
 }
