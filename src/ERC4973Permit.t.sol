@@ -3,6 +3,7 @@ pragma solidity ^0.8.6;
 
 import "forge-std/Test.sol";
 import {IERC165} from "./interfaces/IERC165.sol";
+import {IERC4973Permit} from "./interfaces/IERC4973Permit.sol";
 
 import {ERC4973Permit} from "./ERC4973Permit.sol";
 
@@ -18,6 +19,11 @@ contract ERC4973Test is Test {
 
   function setUp() public {
     abt = new AccountBoundToken();
+  }
+
+  function testIERC4973Permit() public {
+    bytes4 interfaceId = type(IERC4973Permit).interfaceId;
+    assertEq(interfaceId, bytes4(0x85d685d2));
   }
 
   function testMintWithDifferentTokenURI() public {
