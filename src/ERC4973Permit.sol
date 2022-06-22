@@ -7,7 +7,7 @@ import {ERC4973} from "./ERC4973.sol";
 import {IERC4973Permit} from "./interfaces/IERC4973Permit.sol"; 
 
 /// @notice Reference implementation of ERC4973Permit
-/// @author Rahul Rumalla, Tim Daub (https://github.com/rugpullindex/ERC4973/blob/master/src/ERC4973Permit.sol)
+/// @author Rahul Rumalla, Tim Daubenschuetz (https://github.com/rugpullindex/ERC4973/blob/master/src/ERC4973Permit.sol)
 abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
   bytes32 private immutable MINT_PERMIT_TYPEHASH =
     keccak256(
