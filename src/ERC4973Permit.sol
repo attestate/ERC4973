@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-
 import {ERC4973} from "./ERC4973.sol";
+import {IERC4973Permit} from "./interfaces/IERC4973Permit.sol"; 
 
 /// @notice Reference implementation of ERC4973Permit
-/// @author Rahul Rumalla, Tim Daub
-abstract contract ERC4973Permit is ERC4973, EIP712 {
+/// @author Rahul Rumalla, Tim Daubenschuetz (https://github.com/rugpullindex/ERC4973/blob/master/src/ERC4973Permit.sol)
+abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
   bytes32 private immutable MINT_PERMIT_TYPEHASH =
     keccak256(
       "MintPermit(address from,address to,string tokenURI)"
@@ -19,6 +19,13 @@ abstract contract ERC4973Permit is ERC4973, EIP712 {
     string memory symbol,
     string memory version
   ) ERC4973(name, symbol) EIP712(name, version) {}
+
+
+  function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+    return
+      interfaceId == type(IERC4973Permit).interfaceId ||
+      super.supportsInterface(interfaceId);
+  }
 
   function mintWithPermission(
     address from,

@@ -3,8 +3,8 @@ pragma solidity ^0.8.6;
 
 /// @title Account-bound tokens
 /// @dev See https://eips.ethereum.org/EIPS/eip-4973
-///  Note: the ERC-165 identifier for this interface is 0x5164cf47.
-interface IERC4973 /* is ERC165, ERC721Metadata */ {
+/// Note: the ERC-165 identifier for this interface is 0x5164cf47
+interface IERC4973 {
   /// @dev This emits when a new token is created and bound to an account by
   /// any mechanism.
   /// Note: For a reliable `from` parameter, retrieve the transaction's
