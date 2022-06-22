@@ -24,6 +24,7 @@ contract ERC4973Test is Test {
   function testIERC4973Permit() public {
     bytes4 interfaceId = type(IERC4973Permit).interfaceId;
     assertEq(interfaceId, bytes4(0x85d685d2));
+    assertTrue(abt.supportsInterface(interfaceId));
   }
 
   function testMintWithDifferentTokenURI() public {

@@ -20,6 +20,13 @@ abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
     string memory version
   ) ERC4973(name, symbol) EIP712(name, version) {}
 
+
+  function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+    return
+      interfaceId == type(IERC4973Permit).interfaceId ||
+      super.supportsInterface(interfaceId);
+  }
+
   function mintWithPermission(
     address from,
     uint256 tokenId,
