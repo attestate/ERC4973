@@ -85,5 +85,32 @@ contract ERC4973Test is Test {
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), to);
   }
+
+  function testMintWithAlreadyUsedVoucher() public {
+    string memory tokenURI = "https://contenthash.com";
+    address to = address(this);
+
+    bytes32 hash = abt.getMintPermitMessageHash(fromAddress, to, tokenURI);
+    (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
+
+    // first attempt to mint should pass
+    abt.mintWithPermission(
+      fromAddress,
+      tokenURI,
+      v,
+      r,
+      s
+    );
+
+    // second attempt to mint should revert
+    vm.expectRevert(bytes("mintWithPermission: voucher already used"));
+    abt.mintWithPermission(
+      fromAddress,
+      tokenURI,
+      v,
+      r,
+      s
+    );
+  }
 }
 

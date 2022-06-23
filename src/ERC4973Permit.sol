@@ -4,6 +4,7 @@ pragma solidity ^0.8.6;
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
+import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
 import {ERC4973} from "./ERC4973.sol";
 import {IERC4973Permit} from "./interfaces/IERC4973Permit.sol";
@@ -18,6 +19,9 @@ abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
     keccak256(
       "MintPermit(address from,address to,string tokenURI)"
   );
+
+  using BitMaps for BitMaps.BitMap;
+  BitMaps.BitMap private _bitMap;
 
   constructor(
     string memory name,
@@ -39,13 +43,27 @@ abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
     bytes32 r,
     bytes32 s
   ) external virtual returns (uint256) {
+    bytes32 mintPermitHash = getMintPermitMessageHash(
+      from,
+      msg.sender,
+      uri
+    );
+
+    uint256 index = uint256(mintPermitHash);
+
     require(
-      _isPermittedToMint(from, msg.sender, uri, v, r, s),
+      !_bitMap.get(index),
+      "mintWithPermission: voucher already used"
+    );
+
+    require(
+      _isPermittedToMint(from, mintPermitHash, v, r, s),
       "mintWithPermission: invalid permission"
     );
     uint256 tokenId = _tokenIds.current();
     _mint(msg.sender, tokenId, uri);
     _tokenIds.increment();
+    _bitMap.set(index);
     return tokenId;
   }
 
@@ -62,17 +80,11 @@ abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
 
   function _isPermittedToMint(
     address from,
-    address to,
-    string calldata tokenURI,
+    bytes32 mintPermitHash,
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) internal view returns (bool) {
-    bytes32 mintPermitHash = getMintPermitMessageHash(
-      from,
-      to,
-      tokenURI
-    );
+  ) internal pure returns (bool) {
     address signer = ECDSA.recover(mintPermitHash, v, r, s);
     return signer == from;
   }
