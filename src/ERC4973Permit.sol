@@ -29,7 +29,6 @@ abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
 
   function mintWithPermission(
     address from,
-    uint256 tokenId,
     string calldata uri,
     uint8 v,
     bytes32 r,
@@ -40,7 +39,7 @@ abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
       "mintWithPermission: invalid permission"
     );
 
-    return _mint(msg.sender, tokenId, uri);
+    return _mint(msg.sender, uri);
   }
 
   function getMintPermitMessageHash(
