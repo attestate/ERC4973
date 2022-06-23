@@ -23,12 +23,11 @@ contract ERC4973Test is Test {
 
   function testIERC4973Permit() public {
     bytes4 interfaceId = type(IERC4973Permit).interfaceId;
-    assertEq(interfaceId, bytes4(0x85d685d2));
+    assertEq(interfaceId, bytes4(0x6b65efaa));
     assertTrue(abt.supportsInterface(interfaceId));
   }
 
   function testMintWithDifferentTokenURI() public {
-    uint256 tokenId = 0;
     string memory tokenURI = "https://contenthash.com";
     address to = address(this);
 
@@ -38,18 +37,17 @@ contract ERC4973Test is Test {
     address unauthorizedFrom = address(1337);
 
     vm.expectRevert(bytes("mintWithPermission: invalid permission"));
-    abt.mintWithPermission(
+    uint256 tokenId = abt.mintWithPermission(
       unauthorizedFrom,
-      tokenId,
       tokenURI,
       v,
       r,
       s
     );
+    assertEq(0, tokenId);
   }
 
   function testMintWithUnauthorizedSender() public {
-    uint256 tokenId = 0;
     string memory tokenURI = "https://contenthash.com";
     address to = address(this);
 
@@ -58,27 +56,25 @@ contract ERC4973Test is Test {
     address unauthorizedFrom = address(1337);
 
     vm.expectRevert(bytes("mintWithPermission: invalid permission"));
-    abt.mintWithPermission(
+    uint256 tokenId = abt.mintWithPermission(
       unauthorizedFrom,
-      tokenId,
       tokenURI,
       v,
       r,
       s
     );
+    assertEq(0, tokenId);
   }
 
   function testMintWithPermit() public {
-    uint256 tokenId = 0;
     string memory tokenURI = "https://contenthash.com";
     address to = address(this);
 
     bytes32 hash = abt.getMintPermitMessageHash(fromAddress, to, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
 
-    abt.mintWithPermission(
+    uint256 tokenId = abt.mintWithPermission(
       fromAddress,
-      tokenId,
       tokenURI,
       v,
       r,

@@ -13,10 +13,9 @@ contract AccountBoundToken is ERC4973 {
 
   function mint(
     address to,
-    uint256 tokenId,
     string calldata uri
   ) external returns (uint256) {
-    return super._mint(to, tokenId, uri);
+    return super._mint(to, uri);
   }
 }
 
@@ -69,8 +68,7 @@ contract ERC4973Test is Test {
     address to = msg.sender;
     assertEq(abt.balanceOf(to), 0);
     string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = 0;
-    abt.mint(to, tokenId, tokenURI);
+    abt.mint(to, tokenURI);
     assertEq(abt.balanceOf(to), 1);
   }
 
@@ -78,8 +76,7 @@ contract ERC4973Test is Test {
     address to = address(this);
     assertEq(abt.balanceOf(to), 0);
     string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = 0;
-    abt.mint(to, tokenId, tokenURI);
+    uint256 tokenId = abt.mint(to, tokenURI);
     assertEq(abt.balanceOf(to), 1);
     abt.burn(tokenId);
     assertEq(abt.balanceOf(to), 0);
@@ -87,8 +84,7 @@ contract ERC4973Test is Test {
 
   function testMint() public {
     string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = 0;
-    abt.mint(msg.sender, tokenId, tokenURI);
+    uint256 tokenId = abt.mint(msg.sender, tokenURI);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), msg.sender);
   }
@@ -96,17 +92,15 @@ contract ERC4973Test is Test {
   function testMintToExternalAddress() public {
     address thirdparty = address(1337);
     string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = 0;
-    abt.mint(thirdparty, tokenId, tokenURI);
+    uint256 tokenId = abt.mint(thirdparty, tokenURI);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), thirdparty);
   }
 
   function testMintAndBurn() public {
     string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = 0;
     address to = address(this);
-    abt.mint(to, tokenId, tokenURI);
+    uint256 tokenId = abt.mint(to, tokenURI);
     assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     abt.burn(tokenId);
@@ -114,9 +108,8 @@ contract ERC4973Test is Test {
 
   function testBurnAsNonAuthorizedAccount() public {
     string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = 0;
     address to = address(this);
-    abt.mint(to, tokenId, tokenURI);
+    uint256 tokenId = abt.mint(to, tokenURI);
     assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
 
@@ -128,9 +121,8 @@ contract ERC4973Test is Test {
 
   function testBurnNonExistentTokenId() public {
     string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = 0;
     address to = address(this);
-    abt.mint(to, tokenId, tokenURI);
+    uint256 tokenId = abt.mint(to, tokenURI);
     assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
 
@@ -138,15 +130,6 @@ contract ERC4973Test is Test {
     vm.expectRevert(bytes("ownerOf: token doesn't exist"));
 
     nac.burn(address(abt), 1337);
-  }
-
-  function testFailToMintTokenToPreexistingTokenId() public {
-    string memory tokenURI = "https://example.com/metadata.json";
-    uint256 tokenId = 0;
-    abt.mint(msg.sender, tokenId, tokenURI);
-    assertEq(abt.tokenURI(tokenId), tokenURI);
-    assertEq(abt.ownerOf(tokenId), msg.sender);
-    abt.mint(msg.sender, tokenId, tokenURI);
   }
 
   function testFailRequestingNonExistentTokenURI() public view {

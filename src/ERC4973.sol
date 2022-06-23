@@ -2,6 +2,7 @@
 pragma solidity ^0.8.6;
 
 import {ERC165} from "./ERC165.sol";
+import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 
 import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
 import {IERC4973} from "./interfaces/IERC4973.sol";
@@ -12,6 +13,9 @@ import {IERC4973} from "./interfaces/IERC4973.sol";
 abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
   string private _name;
   string private _symbol;
+
+  using Counters for Counters.Counter;
+  Counters.Counter private _tokenIds;
 
   mapping(uint256 => address) private _owners;
   mapping(uint256 => string) private _tokenURIs;
@@ -68,14 +72,18 @@ abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
 
   function _mint(
     address to,
-    uint256 tokenId,
     string memory uri
   ) internal virtual returns (uint256) {
-    require(!_exists(tokenId), "mint: tokenID exists");
+    uint256 tokenId = _tokenIds.current();
+
     _balances[to] += 1;
     _owners[tokenId] = to;
     _tokenURIs[tokenId] = uri;
+    
     emit Attest(to, tokenId);
+    
+    _tokenIds.increment();
+    
     return tokenId;
   }
 
