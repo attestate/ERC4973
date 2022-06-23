@@ -80,6 +80,7 @@ contract ERC4973Test is Test {
       r,
       s
     );
+    assertEq(tokenId, 0);
     assertEq(abt.balanceOf(to), 1);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), to);
