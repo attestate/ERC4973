@@ -39,15 +39,13 @@ abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
   function mintWithPermission(
     address from,
     string calldata uri,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    bytes calldata signature
   ) external virtual returns (uint256) {
     bytes32 hash = _getHash(from, msg.sender, uri);
     uint256 index = uint256(hash);
 
     require(
-      _isSignatureValid(from, hash, v, r, s),
+      _isSignatureValid(from, hash, signature),
       "mintWithPermission: invalid signature"
     );
     require(!_usedHashes.get(index), "mintWithPermission: already used");
@@ -74,11 +72,9 @@ abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
   function _isSignatureValid(
     address from,
     bytes32 hash,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    bytes calldata signature
   ) internal pure returns (bool) {
-    address signer = ECDSA.recover(hash, v, r, s);
+    address signer = ECDSA.recover(hash, signature);
     return signer == from;
   }
 }

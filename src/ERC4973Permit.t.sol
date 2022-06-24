@@ -31,7 +31,7 @@ contract ERC4973Test is Test {
 
   function testIERC4973Permit() public {
     bytes4 interfaceId = type(IERC4973Permit).interfaceId;
-    assertEq(interfaceId, bytes4(0x6b65efaa));
+    assertEq(interfaceId, bytes4(0x8fac1c1c));
     assertTrue(abt.supportsInterface(interfaceId));
   }
 
@@ -42,15 +42,14 @@ contract ERC4973Test is Test {
     string memory falseTokenURI = "https://badstuff.com";
     bytes32 hash = abt.getHash(fromAddress, to, falseTokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
+    bytes memory signature = abi.encodePacked(r, s, v);
     address unauthorizedFrom = address(1337);
 
     vm.expectRevert(bytes("mintWithPermission: invalid signature"));
     uint256 tokenId = abt.mintWithPermission(
       unauthorizedFrom,
       tokenURI,
-      v,
-      r,
-      s
+      signature
     );
     assertEq(0, tokenId);
   }
@@ -61,15 +60,14 @@ contract ERC4973Test is Test {
 
     bytes32 hash = abt.getHash(fromAddress, to, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
+    bytes memory signature = abi.encodePacked(r, s, v);
     address unauthorizedFrom = address(1337);
 
     vm.expectRevert(bytes("mintWithPermission: invalid signature"));
     uint256 tokenId = abt.mintWithPermission(
       unauthorizedFrom,
       tokenURI,
-      v,
-      r,
-      s
+      signature
     );
     assertEq(0, tokenId);
   }
@@ -80,13 +78,12 @@ contract ERC4973Test is Test {
 
     bytes32 hash = abt.getHash(fromAddress, to, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
+    bytes memory signature = abi.encodePacked(r, s, v);
 
     uint256 tokenId = abt.mintWithPermission(
       fromAddress,
       tokenURI,
-      v,
-      r,
-      s
+      signature
     );
     assertEq(tokenId, 0);
     assertEq(abt.balanceOf(to), 1);
@@ -100,24 +97,19 @@ contract ERC4973Test is Test {
 
     bytes32 hash = abt.getHash(fromAddress, to, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
+    bytes memory signature = abi.encodePacked(r, s, v);
 
-    // first attempt to mint should pass
     abt.mintWithPermission(
       fromAddress,
       tokenURI,
-      v,
-      r,
-      s
+      signature
     );
 
-    // second attempt to mint should revert
     vm.expectRevert(bytes("mintWithPermission: already used"));
     abt.mintWithPermission(
       fromAddress,
       tokenURI,
-      v,
-      r,
-      s
+      signature
     );
   }
 }
