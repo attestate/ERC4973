@@ -9,6 +9,14 @@ import {ERC4973Permit} from "./ERC4973Permit.sol";
 
 contract AccountBoundToken is ERC4973Permit {
   constructor() ERC4973Permit("Name", "Symbol", "Version") {}
+
+  function getHash(
+    address from,
+    address to,
+    string calldata tokenURI
+  ) public view returns (bytes32) {
+    return _getHash(from, to, tokenURI);
+  }
 }
 
 contract ERC4973Test is Test {
@@ -32,11 +40,11 @@ contract ERC4973Test is Test {
     address to = address(this);
 
     string memory falseTokenURI = "https://badstuff.com";
-    bytes32 hash = abt.getMintPermitMessageHash(fromAddress, to, falseTokenURI);
+    bytes32 hash = abt.getHash(fromAddress, to, falseTokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
     address unauthorizedFrom = address(1337);
 
-    vm.expectRevert(bytes("mintWithPermission: invalid permission"));
+    vm.expectRevert(bytes("mintWithPermission: invalid signature"));
     uint256 tokenId = abt.mintWithPermission(
       unauthorizedFrom,
       tokenURI,
@@ -51,11 +59,11 @@ contract ERC4973Test is Test {
     string memory tokenURI = "https://contenthash.com";
     address to = address(this);
 
-    bytes32 hash = abt.getMintPermitMessageHash(fromAddress, to, tokenURI);
+    bytes32 hash = abt.getHash(fromAddress, to, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
     address unauthorizedFrom = address(1337);
 
-    vm.expectRevert(bytes("mintWithPermission: invalid permission"));
+    vm.expectRevert(bytes("mintWithPermission: invalid signature"));
     uint256 tokenId = abt.mintWithPermission(
       unauthorizedFrom,
       tokenURI,
@@ -70,7 +78,7 @@ contract ERC4973Test is Test {
     string memory tokenURI = "https://contenthash.com";
     address to = address(this);
 
-    bytes32 hash = abt.getMintPermitMessageHash(fromAddress, to, tokenURI);
+    bytes32 hash = abt.getHash(fromAddress, to, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
 
     uint256 tokenId = abt.mintWithPermission(
@@ -90,7 +98,7 @@ contract ERC4973Test is Test {
     string memory tokenURI = "https://contenthash.com";
     address to = address(this);
 
-    bytes32 hash = abt.getMintPermitMessageHash(fromAddress, to, tokenURI);
+    bytes32 hash = abt.getHash(fromAddress, to, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, hash);
 
     // first attempt to mint should pass
@@ -103,7 +111,7 @@ contract ERC4973Test is Test {
     );
 
     // second attempt to mint should revert
-    vm.expectRevert(bytes("mintWithPermission: voucher already used"));
+    vm.expectRevert(bytes("mintWithPermission: already used"));
     abt.mintWithPermission(
       fromAddress,
       tokenURI,
