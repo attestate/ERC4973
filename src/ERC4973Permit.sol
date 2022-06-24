@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.6;
 
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
@@ -45,7 +45,7 @@ abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
     uint256 index = uint256(hash);
 
     require(
-      _isSignatureValid(from, hash, signature),
+      SignatureChecker.isValidSignatureNow(from, hash, signature),
       "mintWithPermission: invalid signature"
     );
     require(!_usedHashes.get(index), "mintWithPermission: already used");
@@ -67,14 +67,5 @@ abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
       abi.encode(MINT_PERMIT_TYPEHASH, from, to, tokenURI)
     );
     return _hashTypedDataV4(structHash);
-  }
-
-  function _isSignatureValid(
-    address from,
-    bytes32 hash,
-    bytes calldata signature
-  ) internal pure returns (bool) {
-    address signer = ECDSA.recover(hash, signature);
-    return signer == from;
   }
 }
