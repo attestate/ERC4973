@@ -2,8 +2,7 @@
 
 ## 0.0.2
 
-- Comply with standard specification at HEAD
-  [ethereum/EIPS/commits/bc713c3f19d53f41adc008646b6eb0a322d0aac3](https://github.com/ethereum/EIPs/commit/bc713c3f19d53f41adc008646b6eb0a322d0aac3).
+- Comply with standard specification at: https://github.com/ethereum/EIPs/tree/d5858d249ffbdab2e39bc56026366682678704dd.
 
 ## 0.0.1
 
