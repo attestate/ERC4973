@@ -3,6 +3,9 @@
 Testable implementation of
 [EIP-4973](https://eips.ethereum.org/EIPS/eip-4973).
 
+GitHub Actions is continuously building the flat file reference implementation
+to [assets/ERC4973-flat.sol](https://github.com/rugpullindex/ERC4973/blob/master/assets/ERC4973-flat.sol)
+
 ## Communication
 
 - Non-formal communication can happen across all communication channels, e.g.,
