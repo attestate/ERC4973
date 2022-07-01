@@ -1,0 +1,33 @@
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+name: generate flat file for ethereum/EIPs
+
+jobs:
+  check:
+    name: Foundry project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      - name: Generate flat file
+        run: forge flatten src/ERC4973.sol > ./assets/ERC4973-flat.sol
+      - name: Update file in repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        with:
+          source-directory: 'assets'
+          destination-github-username: 'rugpullindex'
+          destination-repository-name: 'ERC4973'
+          user-email: info@rugpullindex.com
+          target-directory: assets
+          target-branch: master
