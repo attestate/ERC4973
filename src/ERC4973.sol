@@ -1,25 +1,42 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.8;
 
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import {EIP712} from "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
+import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
+import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+
 import {ERC165} from "./ERC165.sol";
 
 import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
 import {IERC4973} from "./interfaces/IERC4973.sol";
 
+bytes32 constant AGREEMENT_HASH =
+  keccak256(
+    "Agreement(address active,address passive,string tokenURI)"
+);
+
 /// @notice Reference implementation of EIP-4973 tokens.
-/// @author TimDaub (https://github.com/rugpullindex/ERC4973/blob/master/src/ERC4973.sol)
-abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
+/// @author Tim Daubenschütz, Rahul Rumalla (https://github.com/rugpullindex/ERC4973/blob/master/src/ERC4973.sol)
+abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
+  using Counters for Counters.Counter;
+  Counters.Counter private _tokenIds;
+  using BitMaps for BitMaps.BitMap;
+  BitMaps.BitMap private _usedHashes;
+
   string private _name;
   string private _symbol;
 
   mapping(uint256 => address) private _owners;
   mapping(uint256 => string) private _tokenURIs;
   mapping(address => uint256) private _balances;
+  mapping(uint256 => uint256) private _inventory;
 
   constructor(
     string memory name_,
-    string memory symbol_
-  ) {
+    string memory symbol_,
+    string memory version
+  ) EIP712(name_, version) {
     _name = name_;
     _symbol = symbol_;
   }
@@ -44,8 +61,10 @@ abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
     return _tokenURIs[tokenId];
   }
 
-  function burn(uint256 tokenId) public virtual override {
-    require(msg.sender == ownerOf(tokenId), "burn: sender must be owner");
+  function unequip(uint256 tokenId) public virtual override {
+    require(msg.sender == ownerOf(tokenId), "unequip: sender must be owner");
+    uint256 index = _inventory[tokenId];
+    _usedHashes.unset(index);
     _burn(tokenId);
   }
 
@@ -61,6 +80,73 @@ abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
     return owner;
   }
 
+  function give(
+//  address from, // is the `msg.sender`,
+    address to,
+    string calldata uri,
+    bytes calldata signature
+  ) external virtual returns (uint256) {
+    require(msg.sender != to, "give: cannot give from self");
+    uint256 index = _safeCheckAgreement(msg.sender, to, uri, signature);
+    uint256 tokenId = _tokenIds.current();
+    _inventory[tokenId] = index;
+    _mint(to, tokenId, uri);
+    _tokenIds.increment();
+
+    _usedHashes.set(index);
+    return tokenId;
+  }
+
+  function take(
+    address from,
+//  address to, // is the `msg.sender`,
+    string calldata uri,
+    bytes calldata signature
+  ) external virtual returns (uint256) {
+    require(msg.sender != from, "take: cannot take from self");
+    uint256 index = _safeCheckAgreement(msg.sender, from, uri, signature);
+    uint256 tokenId = _tokenIds.current();
+    _inventory[tokenId] = index;
+    _mint(msg.sender, tokenId, uri);
+    _tokenIds.increment();
+
+    _usedHashes.set(index);
+    return tokenId;
+  }
+
+  function _safeCheckAgreement(
+    address active,
+    address passive,
+    string calldata uri,
+    bytes calldata signature
+  ) internal virtual returns (uint256) {
+    bytes32 hash = _getHash(active, passive, uri);
+    uint256 index = uint256(hash);
+
+    require(
+      SignatureChecker.isValidSignatureNow(passive, hash, signature),
+      "_safeCheckAgreement: invalid signature"
+    );
+    require(!_usedHashes.get(index), "_safeCheckAgreement: already used");
+    return index;
+  }
+
+  function _getHash(
+    address active,
+    address passive,
+    string calldata tokenURI
+  ) internal view returns (bytes32) {
+    bytes32 structHash = keccak256(
+      abi.encode(
+        AGREEMENT_HASH,
+        active,
+        passive,
+        keccak256(bytes(tokenURI))
+      )
+    );
+    return _hashTypedDataV4(structHash);
+  }
+
   function _exists(uint256 tokenId) internal view virtual returns (bool) {
     return _owners[tokenId] != address(0);
   }
@@ -74,7 +160,7 @@ abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
     _balances[to] += 1;
     _owners[tokenId] = to;
     _tokenURIs[tokenId] = uri;
-    emit Attest(to, tokenId);
+    emit Transfer(address(0), to, tokenId);
     return tokenId;
   }
 
@@ -85,6 +171,6 @@ abstract contract ERC4973 is ERC165, IERC721Metadata, IERC4973 {
     delete _owners[tokenId];
     delete _tokenURIs[tokenId];
 
-    emit Revoke(owner, tokenId);
+    emit Transfer(owner, address(0), tokenId);
   }
 }
