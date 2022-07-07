@@ -64,7 +64,12 @@ abstract contract ERC4973Permit is ERC4973, EIP712, IERC4973Permit {
     string calldata tokenURI
   ) internal view returns (bytes32) {
     bytes32 structHash = keccak256(
-      abi.encode(MINT_PERMIT_TYPEHASH, from, to, tokenURI)
+      abi.encode(
+        MINT_PERMIT_TYPEHASH,
+        from,
+        to,
+        keccak256(bytes(tokenURI))
+      )
     );
     return _hashTypedDataV4(structHash);
   }
