@@ -3,7 +3,6 @@ pragma solidity ^0.8.8;
 
 import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
 import {ERC165} from "./ERC165.sol";
@@ -19,8 +18,6 @@ bytes32 constant AGREEMENT_HASH =
 /// @notice Reference implementation of EIP-4973 tokens.
 /// @author Tim Daubenschütz, Rahul Rumalla (https://github.com/rugpullindex/ERC4973/blob/master/src/ERC4973.sol)
 abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
-  using Counters for Counters.Counter;
-  Counters.Counter private _tokenIds;
   using BitMaps for BitMaps.BitMap;
   BitMaps.BitMap private _usedHashes;
 
@@ -63,8 +60,7 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
 
   function unequip(uint256 tokenId) public virtual override {
     require(msg.sender == ownerOf(tokenId), "unequip: sender must be owner");
-    uint256 index = _inventory[tokenId];
-    _usedHashes.unset(index);
+    _usedHashes.unset(tokenId);
     _burn(tokenId);
   }
 
@@ -81,36 +77,26 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
   }
 
   function give(
-//  address from, // is the `msg.sender`,
     address to,
     string calldata uri,
     bytes calldata signature
   ) external virtual returns (uint256) {
     require(msg.sender != to, "give: cannot give from self");
-    uint256 index = _safeCheckAgreement(msg.sender, to, uri, signature);
-    uint256 tokenId = _tokenIds.current();
-    _inventory[tokenId] = index;
+    uint256 tokenId = _safeCheckAgreement(msg.sender, to, uri, signature);
     _mint(to, tokenId, uri);
-    _tokenIds.increment();
-
-    _usedHashes.set(index);
+    _usedHashes.set(tokenId);
     return tokenId;
   }
 
   function take(
     address from,
-//  address to, // is the `msg.sender`,
     string calldata uri,
     bytes calldata signature
   ) external virtual returns (uint256) {
     require(msg.sender != from, "take: cannot take from self");
-    uint256 index = _safeCheckAgreement(msg.sender, from, uri, signature);
-    uint256 tokenId = _tokenIds.current();
-    _inventory[tokenId] = index;
+    uint256 tokenId = _safeCheckAgreement(msg.sender, from, uri, signature);
     _mint(msg.sender, tokenId, uri);
-    _tokenIds.increment();
-
-    _usedHashes.set(index);
+    _usedHashes.set(tokenId);
     return tokenId;
   }
 
@@ -121,14 +107,14 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
     bytes calldata signature
   ) internal virtual returns (uint256) {
     bytes32 hash = _getHash(active, passive, uri);
-    uint256 index = uint256(hash);
+    uint256 tokenId = uint256(hash);
 
     require(
       SignatureChecker.isValidSignatureNow(passive, hash, signature),
       "_safeCheckAgreement: invalid signature"
     );
-    require(!_usedHashes.get(index), "_safeCheckAgreement: already used");
-    return index;
+    require(!_usedHashes.get(tokenId), "_safeCheckAgreement: already used");
+    return tokenId;
   }
 
   function _getHash(
