@@ -1,0 +1,31 @@
+{
+  "name": "erc4973",
+  "version": "0.3.0",
+  "description": "A standard interface for non-transferrable non-fungible tokens, also known as \"account-bound\" or \"soulbound tokens\" or \"badges\".",
+  "files": [
+    "/src/ERC4973.sol",
+    "/src/interfaces/IERC4973.sol"
+  ],
+  "scripts": {
+    "test": "forge test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rugpullindex/ERC4973.git"
+  },
+  "keywords": [
+    "account-bound",
+    "soulbound",
+    "tokens",
+    "ethereum",
+    "eip",
+    "badges",
+    "non-transferrable"
+  ],
+  "author": "Tim Daubenschütz <tim@daubenschuetz.de> (https://timdaub.github.io/)",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/rugpullindex/ERC4973/issues"
+  },
+  "homepage": "https://github.com/rugpullindex/ERC4973#readme"
+}

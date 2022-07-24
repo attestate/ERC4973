@@ -1,4 +1,4 @@
-# Account-bound tokens
+# ERC4973 - Account-bound tokens
 
 Testable implementation of
 [EIP-4973](https://eips.ethereum.org/EIPS/eip-4973).
@@ -32,6 +32,26 @@ to [assets/ERC4973-flat.sol](https://github.com/rugpullindex/ERC4973/blob/master
   [semver](https://semver.org/). In [changelog.md](./changelog.md) each git tag
   will have a respective description, e.g., referrencing the ethereum/EIPs
   commit height we're implementing.
+
+## Installation with foundry/dapptools
+
+```bash
+forge install https://github.com/rugpullindex/ERC4973
+dapp install https://github.com/rugpullindex/ERC4973
+```
+
+## Installation with npm
+
+```bash
+npm i erc4973
+```
+
+## Contributing
+
+Please reach out to me e.g. on social media or via emails, I can get you
+started.. Alternatively check the [official feedback
+thread](https://ethereum-magicians.org/t/eip-4973-account-bound-tokens/8825) on
+the Ethereum Magician's forum.
 
 ## Copyright
 
