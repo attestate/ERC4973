@@ -119,14 +119,14 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
   function _getHash(
     address active,
     address passive,
-    string calldata tokenURI
+    string calldata uri
   ) internal view returns (bytes32) {
     bytes32 structHash = keccak256(
       abi.encode(
         AGREEMENT_HASH,
         active,
         passive,
-        keccak256(bytes(tokenURI))
+        keccak256(bytes(uri))
       )
     );
     return _hashTypedDataV4(structHash);
