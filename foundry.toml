@@ -2,6 +2,7 @@
 src = 'src'
 out = 'out'
 libs = ['lib']
-remappings = ['ds-test/=lib/ds-test/src/','openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/']
+remappings = ['@openzeppelin/=lib/openzeppelin-contracts/']
+solc_version = '0.8.8'
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config

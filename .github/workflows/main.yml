@@ -1,44 +1,27 @@
 on:
   push:
-    branches:
-      - master
+    branches: [master]
   pull_request:
+    branches: [master]
 
-name: unit tests
+name: test
 
 jobs:
-  tests:
+  check:
+    name: Foundry project
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Install libusb (needed to hw wallet support on Forge/Cast)
-        run: sudo apt update && sudo apt install pkg-config libudev-dev
-
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
+          submodules: recursive
 
-      - uses: Swatinem/rust-cache@v1
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
         with:
-          cache-on-failure: true
+          version: nightly
 
-      - name: Cache Forge
-        id: cache-forge
-        uses: actions/cache@v2
-        with:
-          path: ~/.cargo/bin/forge
-          key: cache-forge
-
-      # if couldn't get, install it
-      - name: Install Forge
-        if: steps.cache-forge.outputs.cache-hit != 'true'
-        run: |
-          cargo install --git https://github.com/gakonst/foundry --bin forge --locked
       - name: Run tests
-        run: forge test
+        run: forge test -vvv
 
+      - name: Run snapshot
+        run: forge snapshot
