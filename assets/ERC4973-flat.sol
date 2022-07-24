@@ -881,7 +881,6 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
   mapping(uint256 => address) private _owners;
   mapping(uint256 => string) private _tokenURIs;
   mapping(address => uint256) private _balances;
-  mapping(uint256 => uint256) private _inventory;
 
   constructor(
     string memory name_,
@@ -973,14 +972,14 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
   function _getHash(
     address active,
     address passive,
-    string calldata tokenURI
+    string calldata uri
   ) internal view returns (bytes32) {
     bytes32 structHash = keccak256(
       abi.encode(
         AGREEMENT_HASH,
         active,
         passive,
-        keccak256(bytes(tokenURI))
+        keccak256(bytes(uri))
       )
     );
     return _hashTypedDataV4(structHash);
