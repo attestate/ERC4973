@@ -2,7 +2,7 @@
   "name": "eip4973",
   "version": "0.0.1",
   "description": "A standard interface for non-transferrable non-fungible tokens, also known as \"account-bound\" or \"soulbound tokens\" or \"badges\".",
-  "files": ["/src/ERC4973.sol"],
+  "files": ["/src/ERC4973.sol", "/src/interfaces/IERC4973.sol"],
   "scripts": {
     "test": "forge test"
   },
