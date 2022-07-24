@@ -27,7 +27,6 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
   mapping(uint256 => address) private _owners;
   mapping(uint256 => string) private _tokenURIs;
   mapping(address => uint256) private _balances;
-  mapping(uint256 => uint256) private _inventory;
 
   constructor(
     string memory name_,
