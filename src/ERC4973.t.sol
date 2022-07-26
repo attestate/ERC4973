@@ -65,11 +65,12 @@ contract AccountBoundToken is ERC4973 {
   }
 
   function mint(
+    address from,
     address to,
     uint256 tokenId,
     string calldata uri
   ) external returns (uint256) {
-    return super._mint(to, tokenId, uri);
+    return _mint(from, to, tokenId, uri);
   }
 }
 
@@ -125,47 +126,52 @@ contract ERC4973Test is Test {
   }
 
   function testBalanceIncreaseAfterMint() public {
+    address from = address(0);
     address to = msg.sender;
     assertEq(abt.balanceOf(to), 0);
     string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
-    abt.mint(to, tokenId, tokenURI);
+    abt.mint(from, to, tokenId, tokenURI);
     assertEq(abt.balanceOf(to), 1);
   }
 
   function testBalanceIncreaseAfterMintAndUnequip() public {
+    address from = address(0);
     address to = address(this);
     assertEq(abt.balanceOf(to), 0);
     string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
-    abt.mint(to, tokenId, tokenURI);
+    abt.mint(from, to, tokenId, tokenURI);
     assertEq(abt.balanceOf(to), 1);
     abt.unequip(tokenId);
     assertEq(abt.balanceOf(to), 0);
   }
 
   function testMint() public {
+    address from = address(0);
     string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
-    abt.mint(msg.sender, tokenId, tokenURI);
+    abt.mint(from, msg.sender, tokenId, tokenURI);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), msg.sender);
   }
 
   function testMintToExternalAddress() public {
+    address from = address(0);
     address thirdparty = address(1337);
     string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
-    abt.mint(thirdparty, tokenId, tokenURI);
+    abt.mint(from, thirdparty, tokenId, tokenURI);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), thirdparty);
   }
 
   function testMintAndUnequip() public {
     string memory tokenURI = "https://example.com/metadata.json";
+    address from = address(0);
     address to = address(this);
     uint256 tokenId = 0;
-    abt.mint(to, tokenId, tokenURI);
+    abt.mint(from, to, tokenId, tokenURI);
     assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     abt.unequip(tokenId);
@@ -173,9 +179,10 @@ contract ERC4973Test is Test {
 
   function testUnequippingAsNonAuthorizedAccount() public {
     string memory tokenURI = "https://example.com/metadata.json";
+    address from = address(0);
     address to = address(this);
     uint256 tokenId = 0;
-    abt.mint(to, tokenId, tokenURI);
+    abt.mint(from, to, tokenId, tokenURI);
     assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
 
@@ -188,8 +195,9 @@ contract ERC4973Test is Test {
   function testUnequippingNonExistentTokenId() public {
     string memory tokenURI = "https://example.com/metadata.json";
     address to = address(this);
+    address from = address(0);
 		uint256 tokenId = 0;
-    abt.mint(to, tokenId, tokenURI);
+    abt.mint(from, to, tokenId, tokenURI);
     assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
 
@@ -200,12 +208,13 @@ contract ERC4973Test is Test {
   }
 
   function testFailToMintTokenToPreexistingTokenId() public {
+    address from = address(0);
     string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
-    abt.mint(msg.sender, tokenId, tokenURI);
+    abt.mint(from, msg.sender, tokenId, tokenURI);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), msg.sender);
-    abt.mint(msg.sender, tokenId, tokenURI);
+    abt.mint(from, msg.sender, tokenId, tokenURI);
   }
 
   function testFailRequestingNonExistentTokenURI() public view {
