@@ -218,12 +218,11 @@ contract ERC4973Test is Test {
 
   function testGiveWithRejectingERC1271Contract() public {
     string memory tokenURI = "https://contenthash.com";
-    address from = address(this);
     address to = address(rejecter);
     bytes memory signature;
 
     vm.expectRevert(bytes("_safeCheckAgreement: invalid signature"));
-    uint256 tokenId = abt.give(
+    abt.give(
       to,
       tokenURI,
       signature
@@ -232,13 +231,12 @@ contract ERC4973Test is Test {
 
   function testTakeWithRejectingERC1271Contract() public {
     string memory tokenURI = "https://contenthash.com";
-    address to = address(this);
 
     address from = address(rejecter);
     bytes memory signature;
 
     vm.expectRevert(bytes("_safeCheckAgreement: invalid signature"));
-    uint256 tokenId = abt.take(
+    abt.take(
       from,
       tokenURI,
       signature
@@ -247,7 +245,6 @@ contract ERC4973Test is Test {
 
   function testGiveWithApprovingERC1271Contract() public {
     string memory tokenURI = "https://contenthash.com";
-    address from = address(this);
     address to = address(approver);
     bytes memory signature;
 
@@ -372,7 +369,6 @@ contract ERC4973Test is Test {
 
   function testGiveAndUnequipAndRegive() public {
     string memory tokenURI = "https://contenthash.com";
-    address from = address(this);
     address to = address(aa);
     bytes memory signature;
 
@@ -490,7 +486,6 @@ contract ERC4973Test is Test {
   function testPreventGivingToSelf() public {
     string memory tokenURI = "https://contenthash.com";
     address to = address(aa);
-    address from = address(aa);
     bytes memory signature;
 
     vm.expectRevert(bytes("give: cannot give from self"));
@@ -504,7 +499,6 @@ contract ERC4973Test is Test {
 
   function testPreventTakingToSelf() public {
     string memory tokenURI = "https://contenthash.com";
-    address to = address(aa);
     address from = address(aa);
     bytes memory signature;
 
