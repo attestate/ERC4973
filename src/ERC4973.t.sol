@@ -90,6 +90,12 @@ contract ERC4973Test is Test {
   address passiveAddress = 0x0f6A79A579658E401E0B81c6dde1F2cd51d97176;
   uint256 passivePrivateKey = 0xad54bdeade5537fb0a553190159783e45d02d316a992db05cbed606d3ca36b39;
 
+  event Transfer(
+    address indexed from,
+    address indexed to,
+    uint256 indexed tokenId
+  );
+
   function setUp() public {
     abt = new AccountBoundToken();
     approver = new ERC1271Mock(true);
@@ -131,7 +137,11 @@ contract ERC4973Test is Test {
     assertEq(abt.balanceOf(to), 0);
     string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
+
+    vm.expectEmit(true, true, true, false);
+    emit Transfer(from, to, tokenId);
     abt.mint(from, to, tokenId, tokenURI);
+
     assertEq(abt.balanceOf(to), 1);
   }
 
@@ -141,7 +151,11 @@ contract ERC4973Test is Test {
     assertEq(abt.balanceOf(to), 0);
     string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
+
+    vm.expectEmit(true, true, true, false);
+    emit Transfer(from, to, tokenId);
     abt.mint(from, to, tokenId, tokenURI);
+
     assertEq(abt.balanceOf(to), 1);
     abt.unequip(tokenId);
     assertEq(abt.balanceOf(to), 0);
@@ -151,7 +165,11 @@ contract ERC4973Test is Test {
     address from = address(0);
     string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
+
+    vm.expectEmit(true, true, true, false);
+    emit Transfer(from, msg.sender, tokenId);
     abt.mint(from, msg.sender, tokenId, tokenURI);
+
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), msg.sender);
   }
@@ -161,7 +179,11 @@ contract ERC4973Test is Test {
     address thirdparty = address(1337);
     string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
+
+    vm.expectEmit(true, true, true, false);
+    emit Transfer(from, thirdparty, tokenId);
     abt.mint(from, thirdparty, tokenId, tokenURI);
+
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), thirdparty);
   }
@@ -171,7 +193,11 @@ contract ERC4973Test is Test {
     address from = address(0);
     address to = address(this);
     uint256 tokenId = 0;
+
+    vm.expectEmit(true, true, true, false);
+    emit Transfer(from, to, tokenId);
     abt.mint(from, to, tokenId, tokenURI);
+
     assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
     abt.unequip(tokenId);
@@ -182,7 +208,11 @@ contract ERC4973Test is Test {
     address from = address(0);
     address to = address(this);
     uint256 tokenId = 0;
+
+    vm.expectEmit(true, true, true, false);
+    emit Transfer(from, to, tokenId);
     abt.mint(from, to, tokenId, tokenURI);
+
     assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
 
@@ -197,7 +227,11 @@ contract ERC4973Test is Test {
     address to = address(this);
     address from = address(0);
 		uint256 tokenId = 0;
+
+    vm.expectEmit(true, true, true, false);
+    emit Transfer(from, to, tokenId);
     abt.mint(from, to, tokenId, tokenURI);
+
     assertEq(abt.ownerOf(tokenId), to);
     assertEq(abt.tokenURI(tokenId), tokenURI);
 
@@ -211,9 +245,14 @@ contract ERC4973Test is Test {
     address from = address(0);
     string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
+
+    vm.expectEmit(true, true, true, false);
+    emit Transfer(from, msg.sender, tokenId);
     abt.mint(from, msg.sender, tokenId, tokenURI);
+
     assertEq(abt.tokenURI(tokenId), tokenURI);
     assertEq(abt.ownerOf(tokenId), msg.sender);
+
     abt.mint(from, msg.sender, tokenId, tokenURI);
   }
 
