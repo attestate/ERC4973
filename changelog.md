@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0
+
+- Signature change `_mint(address from, address to, uin256 tokenId, string memory uri)`
+- Transfer event now emits the passed in `from` address rather than hardcoding it to `address(0)`
+
 ## 0.3.0
 
 - Comply with standard specification at: https://github.com/ethereum/EIPs/tree/96a91604a547781a596de6af4cb22ec60c4601db
