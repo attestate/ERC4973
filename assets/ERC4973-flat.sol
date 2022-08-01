@@ -935,7 +935,7 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
   ) external virtual returns (uint256) {
     require(msg.sender != to, "give: cannot give from self");
     uint256 tokenId = _safeCheckAgreement(msg.sender, to, uri, signature);
-    _mint(to, tokenId, uri);
+    _mint(msg.sender, to, tokenId, uri);
     _usedHashes.set(tokenId);
     return tokenId;
   }
@@ -947,7 +947,7 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
   ) external virtual returns (uint256) {
     require(msg.sender != from, "take: cannot take from self");
     uint256 tokenId = _safeCheckAgreement(msg.sender, from, uri, signature);
-    _mint(msg.sender, tokenId, uri);
+    _mint(from, msg.sender, tokenId, uri);
     _usedHashes.set(tokenId);
     return tokenId;
   }
@@ -990,6 +990,7 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
   }
 
   function _mint(
+    address from,
     address to,
     uint256 tokenId,
     string memory uri
@@ -998,7 +999,7 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
     _balances[to] += 1;
     _owners[tokenId] = to;
     _tokenURIs[tokenId] = uri;
-    emit Transfer(address(0), to, tokenId);
+    emit Transfer(from, to, tokenId);
     return tokenId;
   }
 
