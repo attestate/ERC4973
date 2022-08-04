@@ -4,10 +4,12 @@
   "description": "A standard interface for non-transferrable non-fungible tokens, also known as \"account-bound\" or \"soulbound tokens\" or \"badges\".",
   "files": [
     "/src/ERC4973.sol",
-    "/src/interfaces/IERC4973.sol"
+    "/src/interfaces/IERC4973.sol",
+    "/sdk/src/index.mjs"
   ],
   "scripts": {
-    "test": "forge test"
+    "test": "forge test",
+    "test:sdk": "ava sdk/test"
   },
   "repository": {
     "type": "git",
@@ -27,5 +29,11 @@
   "bugs": {
     "url": "https://github.com/rugpullindex/ERC4973/issues"
   },
-  "homepage": "https://github.com/rugpullindex/ERC4973#readme"
+  "homepage": "https://github.com/rugpullindex/ERC4973#readme",
+  "dependencies": {
+    "ethers": "5.6.9"
+  },
+  "devDependencies": {
+    "ava": "4.3.1"
+  }
 }

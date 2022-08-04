@@ -5,3 +5,4 @@ run
 verify
 remappings.txt
 .vscode
+node_modules

@@ -403,7 +403,9 @@ contract ERC4973Test is Test {
 
     bytes32 hash = abt.getHash(from, to, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
-    bytes memory signature = abi.encodePacked(r, s, v);
+    bytes memory signature = abi.encodePacked(r, s);
+    bytes memory expected = hex"238e1616c507f9779469b0276eef73a3a438b65706ca18c6ab38062c588674f9719c9f5412b0379e7918f19da1de71b9370ed9917fadcb6690e71f5a1de24816";
+    assertEq(signature, expected);
 
     uint256 tokenId = abt.give(
       to,
@@ -474,7 +476,9 @@ contract ERC4973Test is Test {
 
     bytes32 hash = abt.getHash(to, passiveAddress, tokenURI);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
-    bytes memory signature = abi.encodePacked(r, s, v);
+    bytes memory signature = abi.encodePacked(r, s);
+    bytes memory expected = hex"238e1616c507f9779469b0276eef73a3a438b65706ca18c6ab38062c588674f9719c9f5412b0379e7918f19da1de71b9370ed9917fadcb6690e71f5a1de24816";
+    assertEq(signature, expected);
 
     uint256 tokenId = abt.take(
       passiveAddress,
