@@ -4,7 +4,10 @@
   "description": "A standard interface for non-transferrable non-fungible tokens, also known as \"account-bound\" or \"soulbound tokens\" or \"badges\".",
   "files": [
     "/src/ERC4973.sol",
+    "/src/ERC165.sol",
+    "/src/interfaces/IERC165.sol",
     "/src/interfaces/IERC4973.sol",
+    "/src/interfaces/IERC721Metadata.sol",
     "/sdk/src/index.mjs"
   ],
   "scripts": {
