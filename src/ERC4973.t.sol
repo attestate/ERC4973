@@ -33,19 +33,19 @@ contract AccountAbstraction is ERC1271Mock {
   function give(
     address collection,
     address to,
-    string calldata uri,
+    bytes calldata metadata,
     bytes calldata signature
   ) external virtual returns (uint256) {
-    return ERC4973(collection).give(to, uri, signature);
+    return ERC4973(collection).give(to, metadata, signature);
   }
 
   function take(
     address collection,
     address from,
-    string calldata uri,
+    bytes calldata metadata,
     bytes calldata signature
   ) external virtual returns (uint256) {
-    return ERC4973(collection).take(from, uri, signature);
+    return ERC4973(collection).take(from, metadata, signature);
   }
 
   function unequip(address collection, uint256 tokenId) public virtual {
@@ -59,9 +59,9 @@ contract AccountBoundToken is ERC4973 {
   function getHash(
     address from,
     address to,
-    string calldata tokenURI
+    bytes calldata metadata
   ) public view returns (bytes32) {
-    return _getHash(from, to, tokenURI);
+    return _getHash(from, to, metadata);
   }
 
   function mint(
@@ -90,6 +90,8 @@ contract ERC4973Test is Test {
   address passiveAddress = 0x0f6A79A579658E401E0B81c6dde1F2cd51d97176;
   uint256 passivePrivateKey = 0xad54bdeade5537fb0a553190159783e45d02d316a992db05cbed606d3ca36b39;
 
+  string constant tokenURI = "https://example.com/metadata.json";
+
   event Transfer(
     address indexed from,
     address indexed to,
@@ -113,7 +115,7 @@ contract ERC4973Test is Test {
 
   function testIERC4973() public {
     bytes4 interfaceId = type(IERC4973).interfaceId;
-    assertEq(interfaceId, bytes4(0x8d7bac72));
+    assertEq(interfaceId, bytes4(0xeb72bb7c));
     assertTrue(abt.supportsInterface(interfaceId));
   }
 
@@ -135,7 +137,6 @@ contract ERC4973Test is Test {
     address from = address(0);
     address to = msg.sender;
     assertEq(abt.balanceOf(to), 0);
-    string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
 
     vm.expectEmit(true, true, true, false);
@@ -149,7 +150,6 @@ contract ERC4973Test is Test {
     address from = address(0);
     address to = address(this);
     assertEq(abt.balanceOf(to), 0);
-    string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
 
     vm.expectEmit(true, true, true, false);
@@ -163,7 +163,6 @@ contract ERC4973Test is Test {
 
   function testMint() public {
     address from = address(0);
-    string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
 
     vm.expectEmit(true, true, true, false);
@@ -177,7 +176,6 @@ contract ERC4973Test is Test {
   function testMintToExternalAddress() public {
     address from = address(0);
     address thirdparty = address(1337);
-    string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
 
     vm.expectEmit(true, true, true, false);
@@ -189,7 +187,6 @@ contract ERC4973Test is Test {
   }
 
   function testMintAndUnequip() public {
-    string memory tokenURI = "https://example.com/metadata.json";
     address from = address(0);
     address to = address(this);
     uint256 tokenId = 0;
@@ -204,7 +201,6 @@ contract ERC4973Test is Test {
   }
 
   function testUnequippingAsNonAuthorizedAccount() public {
-    string memory tokenURI = "https://example.com/metadata.json";
     address from = address(0);
     address to = address(this);
     uint256 tokenId = 0;
@@ -223,7 +219,6 @@ contract ERC4973Test is Test {
   }
 
   function testUnequippingNonExistentTokenId() public {
-    string memory tokenURI = "https://example.com/metadata.json";
     address to = address(this);
     address from = address(0);
 		uint256 tokenId = 0;
@@ -243,7 +238,6 @@ contract ERC4973Test is Test {
 
   function testFailToMintTokenToPreexistingTokenId() public {
     address from = address(0);
-    string memory tokenURI = "https://example.com/metadata.json";
     uint256 tokenId = 0;
 
     vm.expectEmit(true, true, true, false);
@@ -265,40 +259,36 @@ contract ERC4973Test is Test {
   }
 
   function testGiveWithRejectingERC1271Contract() public {
-    string memory tokenURI = "https://contenthash.com";
     address to = address(rejecter);
     bytes memory signature;
 
     vm.expectRevert(bytes("_safeCheckAgreement: invalid signature"));
     abt.give(
       to,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
   }
 
   function testTakeWithRejectingERC1271Contract() public {
-    string memory tokenURI = "https://contenthash.com";
-
     address from = address(rejecter);
     bytes memory signature;
 
     vm.expectRevert(bytes("_safeCheckAgreement: invalid signature"));
     abt.take(
       from,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
   }
 
   function testGiveWithApprovingERC1271Contract() public {
-    string memory tokenURI = "https://contenthash.com";
     address to = address(approver);
     bytes memory signature;
 
     uint256 tokenId = abt.give(
       to,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
     assertEq(abt.balanceOf(to), 1);
@@ -307,14 +297,13 @@ contract ERC4973Test is Test {
   }
 
   function testTakeWithApprovingERC1271Contract() public {
-    string memory tokenURI = "https://contenthash.com";
     address to = address(this);
     address from = address(approver);
     bytes memory signature;
 
     uint256 tokenId = abt.take(
       from,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
     assertEq(abt.balanceOf(to), 1);
@@ -323,48 +312,45 @@ contract ERC4973Test is Test {
   }
 
   function testTakeWithDifferentTokenURI() public {
-    string memory tokenURI = "https://contenthash.com";
     address to = address(this);
 
     string memory falseTokenURI = "https://badstuff.com";
-    bytes32 hash = abt.getHash(passiveAddress, to, falseTokenURI);
+    bytes32 hash = abt.getHash(passiveAddress, to, bytes(falseTokenURI));
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
     bytes memory signature = abi.encodePacked(r, s, v);
 
     vm.expectRevert(bytes("_safeCheckAgreement: invalid signature"));
     uint256 tokenId = abt.take(
       passiveAddress,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
     assertEq(0, tokenId);
   }
 
   function testGiveWithDifferentTokenURI() public {
-    string memory tokenURI = "https://contenthash.com";
     address from = address(this);
     address to = passiveAddress;
 
     string memory falseTokenURI = "https://badstuff.com";
-    bytes32 hash = abt.getHash(from, to, falseTokenURI);
+    bytes32 hash = abt.getHash(from, to, bytes(falseTokenURI));
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
     bytes memory signature = abi.encodePacked(r, s, v);
 
     vm.expectRevert(bytes("_safeCheckAgreement: invalid signature"));
     uint256 tokenId = abt.give(
       to,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
     assertEq(0, tokenId);
   }
 
   function testGiveWithUnauthorizedSender() public {
-    string memory tokenURI = "https://contenthash.com";
     address from = address(this);
     address to = passiveAddress;
 
-    bytes32 hash = abt.getHash(from, to, tokenURI);
+    bytes32 hash = abt.getHash(from, to, bytes(tokenURI));
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
     bytes memory signature = abi.encodePacked(r, s, v);
     address unauthorizedTo = address(1337);
@@ -372,17 +358,16 @@ contract ERC4973Test is Test {
     vm.expectRevert(bytes("_safeCheckAgreement: invalid signature"));
     uint256 tokenId = abt.give(
       unauthorizedTo,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
     assertEq(0, tokenId);
   }
 
   function testTakeWithUnauthorizedSender() public {
-    string memory tokenURI = "https://contenthash.com";
     address to = address(this);
 
-    bytes32 hash = abt.getHash(passiveAddress, to, tokenURI);
+    bytes32 hash = abt.getHash(passiveAddress, to, bytes(tokenURI));
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
     bytes memory signature = abi.encodePacked(r, s, v);
     address unauthorizedFrom = address(1337);
@@ -390,26 +375,25 @@ contract ERC4973Test is Test {
     vm.expectRevert(bytes("_safeCheckAgreement: invalid signature"));
     uint256 tokenId = abt.take(
       unauthorizedFrom,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
     assertEq(0, tokenId);
   }
 
   function testGiveEOA() public {
-    string memory tokenURI = "https://contenthash.com";
     address from = address(this);
     address to = passiveAddress;
 
-    bytes32 hash = abt.getHash(from, to, tokenURI);
+    bytes32 hash = abt.getHash(from, to, bytes(tokenURI));
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
-    bytes memory signature = abi.encodePacked(r, s);
-    bytes memory expected = hex"238e1616c507f9779469b0276eef73a3a438b65706ca18c6ab38062c588674f9719c9f5412b0379e7918f19da1de71b9370ed9917fadcb6690e71f5a1de24816";
+    bytes memory signature = abi.encodePacked(r, s, v);
+    bytes memory expected = hex"4473afdec84287f10aa0b5eb608d360e2e9220bee657a4a5ca468e69a4de255c38691fca0c52f295d1831beaa0b7f079c1ab7959257578d2fb8d98740d9b0e111c";
     assertEq(signature, expected);
 
     uint256 tokenId = abt.give(
       to,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
     assertEq(abt.balanceOf(to), 1);
@@ -418,13 +402,12 @@ contract ERC4973Test is Test {
   }
 
   function testGiveAndUnequipAndRegive() public {
-    string memory tokenURI = "https://contenthash.com";
     address to = address(aa);
     bytes memory signature;
 
     uint256 tokenId = abt.give(
       to,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
     assertEq(abt.balanceOf(to), 1);
@@ -434,7 +417,7 @@ contract ERC4973Test is Test {
     assertEq(abt.balanceOf(to), 0);
     uint256 tokenId2 = abt.give(
       to,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
     assertEq(abt.balanceOf(to), 1);
@@ -443,16 +426,15 @@ contract ERC4973Test is Test {
   }
 
   function testTakeAndUnequipAndRetake() public {
-    string memory tokenURI = "https://contenthash.com";
     address to = address(this);
 
-    bytes32 hash = abt.getHash(to, passiveAddress, tokenURI);
+    bytes32 hash = abt.getHash(to, passiveAddress, bytes(tokenURI));
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
     bytes memory signature = abi.encodePacked(r, s, v);
 
     uint256 tokenId = abt.take(
       passiveAddress,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
     assertEq(abt.balanceOf(to), 1);
@@ -462,7 +444,7 @@ contract ERC4973Test is Test {
     assertEq(abt.balanceOf(to), 0);
     uint256 tokenId2 = abt.take(
       passiveAddress,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
     assertEq(abt.balanceOf(to), 1);
@@ -471,18 +453,17 @@ contract ERC4973Test is Test {
   }
 
   function testTakeEOA() public {
-    string memory tokenURI = "https://contenthash.com";
     address to = address(this);
 
-    bytes32 hash = abt.getHash(to, passiveAddress, tokenURI);
+    bytes32 hash = abt.getHash(to, passiveAddress, bytes(tokenURI));
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
-    bytes memory signature = abi.encodePacked(r, s);
-    bytes memory expected = hex"238e1616c507f9779469b0276eef73a3a438b65706ca18c6ab38062c588674f9719c9f5412b0379e7918f19da1de71b9370ed9917fadcb6690e71f5a1de24816";
+    bytes memory signature = abi.encodePacked(r, s, v);
+    bytes memory expected = hex"4473afdec84287f10aa0b5eb608d360e2e9220bee657a4a5ca468e69a4de255c38691fca0c52f295d1831beaa0b7f079c1ab7959257578d2fb8d98740d9b0e111c";
     assertEq(signature, expected);
 
     uint256 tokenId = abt.take(
       passiveAddress,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
     assertEq(abt.balanceOf(to), 1);
@@ -491,52 +472,49 @@ contract ERC4973Test is Test {
   }
 
   function testGiveWithAlreadyUsedVoucher() public {
-    string memory tokenURI = "https://contenthash.com";
     address from = address(this);
     address to = passiveAddress;
 
-    bytes32 hash = abt.getHash(from, to, tokenURI);
+    bytes32 hash = abt.getHash(from, to, bytes(tokenURI));
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
     bytes memory signature = abi.encodePacked(r, s, v);
 
     abt.give(
       to,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
 
     vm.expectRevert(bytes("_safeCheckAgreement: already used"));
     abt.give(
       to,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
   }
 
   function testTakeWithAlreadyUsedVoucher() public {
-    string memory tokenURI = "https://contenthash.com";
     address to = address(this);
 
-    bytes32 hash = abt.getHash(to, passiveAddress, tokenURI);
+    bytes32 hash = abt.getHash(to, passiveAddress, bytes(tokenURI));
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
     bytes memory signature = abi.encodePacked(r, s, v);
 
     abt.take(
       passiveAddress,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
 
     vm.expectRevert(bytes("_safeCheckAgreement: already used"));
     abt.take(
       passiveAddress,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
   }
 
   function testPreventGivingToSelf() public {
-    string memory tokenURI = "https://contenthash.com";
     address to = address(aa);
     bytes memory signature;
 
@@ -544,13 +522,12 @@ contract ERC4973Test is Test {
     aa.give(
       address(abt),
       to,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
   }
 
   function testPreventTakingToSelf() public {
-    string memory tokenURI = "https://contenthash.com";
     address from = address(aa);
     bytes memory signature;
 
@@ -558,7 +535,7 @@ contract ERC4973Test is Test {
     aa.take(
       address(abt),
       from,
-      tokenURI,
+      bytes(tokenURI),
       signature
     );
   }

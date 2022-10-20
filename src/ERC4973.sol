@@ -12,7 +12,7 @@ import {IERC4973} from "./interfaces/IERC4973.sol";
 
 bytes32 constant AGREEMENT_HASH =
   keccak256(
-    "Agreement(address active,address passive,string tokenURI)"
+    "Agreement(address active,address passive,bytes metadata)"
 );
 
 /// @notice Reference implementation of EIP-4973 tokens.
@@ -77,11 +77,12 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
 
   function give(
     address to,
-    string calldata uri,
+    bytes calldata metadata,
     bytes calldata signature
   ) external virtual returns (uint256) {
     require(msg.sender != to, "give: cannot give from self");
-    uint256 tokenId = _safeCheckAgreement(msg.sender, to, uri, signature);
+    uint256 tokenId = _safeCheckAgreement(msg.sender, to, metadata, signature);
+    string memory uri = decodeURI(metadata);
     _mint(msg.sender, to, tokenId, uri);
     _usedHashes.set(tokenId);
     return tokenId;
@@ -89,23 +90,28 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
 
   function take(
     address from,
-    string calldata uri,
+    bytes calldata metadata,
     bytes calldata signature
   ) external virtual returns (uint256) {
     require(msg.sender != from, "take: cannot take from self");
-    uint256 tokenId = _safeCheckAgreement(msg.sender, from, uri, signature);
+    uint256 tokenId = _safeCheckAgreement(msg.sender, from, metadata, signature);
+    string memory uri = decodeURI(metadata);
     _mint(from, msg.sender, tokenId, uri);
     _usedHashes.set(tokenId);
     return tokenId;
   }
 
+  function decodeURI(bytes calldata metadata) public virtual returns (string memory) {
+    return string(metadata);
+  }
+
   function _safeCheckAgreement(
     address active,
     address passive,
-    string calldata uri,
+    bytes calldata metadata,
     bytes calldata signature
   ) internal virtual returns (uint256) {
-    bytes32 hash = _getHash(active, passive, uri);
+    bytes32 hash = _getHash(active, passive, metadata);
     uint256 tokenId = uint256(hash);
 
     require(
@@ -119,14 +125,14 @@ abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
   function _getHash(
     address active,
     address passive,
-    string calldata uri
+    bytes calldata metadata
   ) internal view returns (bytes32) {
     bytes32 structHash = keccak256(
       abi.encode(
         AGREEMENT_HASH,
         active,
         passive,
-        keccak256(bytes(uri))
+        keccak256(metadata)
       )
     );
     return _hashTypedDataV4(structHash);
