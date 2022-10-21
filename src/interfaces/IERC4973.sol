@@ -36,7 +36,7 @@ interface IERC4973 {
   function unequip(uint256 tokenId) external;
   /// @notice Creates and transfers the ownership of an ABT from the
   ///  transaction's `msg.sender` to `address to`.
-  /// @dev Throws unless `bytes signature` represents an EIP-2089 Compact
+  /// @dev Throws unless `bytes signature` represents an EIP-2098 Compact
   ///  Signature of the EIP-712 structured data hash
   ///  `Agreement(address active,address passive,string tokenURI)` expressing
   ///  `address to`'s explicit agreement to be publicly associated with
@@ -49,7 +49,7 @@ interface IERC4973 {
   ///  `uint256 tokenId` in the contract, `function give(...)` must throw.
   /// @param to The receiver of the ABT.
   /// @param uri A distinct Uniform Resource Identifier (URI) for a given ABT.
-  /// @param signature A EIP-2089-compatible Compact Signature of the EIP-712
+  /// @param signature A EIP-2098-compatible Compact Signature of the EIP-712
   ///  structured data hash
   ///  `Agreement(address active,address passive,string tokenURI)` signed by
   ///  `address to`.
@@ -62,7 +62,7 @@ interface IERC4973 {
   ) external returns (uint256);
   /// @notice Creates and transfers the ownership of an ABT from an
   /// `address from` to the transaction's `msg.sender`.
-  /// @dev Throws unless `bytes signature` represents an EIP-2089 Compact
+  /// @dev Throws unless `bytes signature` represents an EIP-2098 Compact
   ///  Signature of the EIP-712 structured data hash
   ///  `Agreement(address active,address passive,string tokenURI)` expressing
   ///  `address from`'s explicit agreement to be publicly associated with
@@ -76,7 +76,7 @@ interface IERC4973 {
   ///  throw.
   /// @param from The origin of the ABT.
   /// @param uri A distinct Uniform Resource Identifier (URI) for a given ABT.
-  /// @param signature A EIP-2089-compatible Compact Signature of the EIP-712
+  /// @param signature A EIP-2098-compatible Compact Signature of the EIP-712
   ///  structured data hash
   ///  `Agreement(address active,address passive,string tokenURI)` signed by
   ///  `address from`.
