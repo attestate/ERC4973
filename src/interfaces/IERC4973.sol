@@ -48,7 +48,7 @@ interface IERC4973 {
   ///  `event Transfer(msg.sender, to, tokenId)`. Once an ABT exists as an
   ///  `uint256 tokenId` in the contract, `function give(...)` must throw.
   /// @param to The receiver of the ABT.
-  /// @param uri A distinct Uniform Resource Identifier (URI) for a given ABT.
+  /// @param metadata The metadata that will be associated to the ABT.
   /// @param signature A EIP-2098-compatible Compact Signature of the EIP-712
   ///  structured data hash
   ///  `Agreement(address active,address passive,bytes metadata)` signed by
@@ -75,7 +75,7 @@ interface IERC4973 {
   ///  exists as an `uint256 tokenId` in the contract, `function take(...)` must
   ///  throw.
   /// @param from The origin of the ABT.
-  /// @param uri A distinct Uniform Resource Identifier (URI) for a given ABT.
+  /// @param metadata The metadata that will be associated to the ABT.
   /// @param signature A EIP-2098-compatible Compact Signature of the EIP-712
   ///  structured data hash
   ///  `Agreement(address active,address passive,bytes metadata)` signed by
