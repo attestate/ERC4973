@@ -3,7 +3,7 @@ pragma solidity ^0.8.6;
 
 /// @title Account-bound tokens
 /// @dev See https://eips.ethereum.org/EIPS/eip-4973
-/// Note: the ERC-165 identifier for this interface is 0x5164cf47
+/// Note: the ERC-165 identifier for this interface is 0x8d7bac72
 interface IERC4973 {
   /// @dev This emits when ownership of any ABT changes by any mechanism.
   ///  This event emits when ABTs are given or equipped and unequipped
@@ -36,7 +36,7 @@ interface IERC4973 {
   function unequip(uint256 tokenId) external;
   /// @notice Creates and transfers the ownership of an ABT from the
   ///  transaction's `msg.sender` to `address to`.
-  /// @dev Throws unless `bytes signature` represents an EIP-2089 Compact
+  /// @dev Throws unless `bytes signature` represents an EIP-2098 Compact
   ///  Signature of the EIP-712 structured data hash
   ///  `Agreement(address active,address passive,bytes metadata)` expressing
   ///  `address to`'s explicit agreement to be publicly associated with
@@ -48,8 +48,8 @@ interface IERC4973 {
   ///  `event Transfer(msg.sender, to, tokenId)`. Once an ABT exists as an
   ///  `uint256 tokenId` in the contract, `function give(...)` must throw.
   /// @param to The receiver of the ABT.
-  /// @param metadata The metadata that will be associated to the ABT.
-  /// @param signature A EIP-2089-compatible Compact Signature of the EIP-712
+  /// @param uri A distinct Uniform Resource Identifier (URI) for a given ABT.
+  /// @param signature A EIP-2098-compatible Compact Signature of the EIP-712
   ///  structured data hash
   ///  `Agreement(address active,address passive,bytes metadata)` signed by
   ///  `address to`.
@@ -62,7 +62,7 @@ interface IERC4973 {
   ) external returns (uint256);
   /// @notice Creates and transfers the ownership of an ABT from an
   /// `address from` to the transaction's `msg.sender`.
-  /// @dev Throws unless `bytes signature` represents an EIP-2089 Compact
+  /// @dev Throws unless `bytes signature` represents an EIP-2098 Compact
   ///  Signature of the EIP-712 structured data hash
   ///  `Agreement(address active,address passive,bytes metadata)` expressing
   ///  `address from`'s explicit agreement to be publicly associated with
@@ -75,8 +75,8 @@ interface IERC4973 {
   ///  exists as an `uint256 tokenId` in the contract, `function take(...)` must
   ///  throw.
   /// @param from The origin of the ABT.
-  /// @param metadata The metadata that will be associated to the ABT.
-  /// @param signature A EIP-2089-compatible Compact Signature of the EIP-712
+  /// @param uri A distinct Uniform Resource Identifier (URI) for a given ABT.
+  /// @param signature A EIP-2098-compatible Compact Signature of the EIP-712
   ///  structured data hash
   ///  `Agreement(address active,address passive,bytes metadata)` signed by
   ///  `address from`.
