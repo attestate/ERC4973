@@ -20,6 +20,9 @@ jobs:
         with:
           version: nightly
 
+      - name: Run lint check
+        run: forge fmt --check
+
       - name: Run tests
         run: forge test -vvv
 
