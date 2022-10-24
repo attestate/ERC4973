@@ -2,7 +2,7 @@
 pragma solidity ^0.8.6;
 
 import "forge-std/Test.sol";
-import {IERC165} from "./interfaces/IERC165.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
 import {IERC4973} from "./interfaces/IERC4973.sol";
