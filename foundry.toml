@@ -7,5 +7,6 @@ solc_version = '0.8.8'
 
 [fmt]
 line_length = 80
+tab_width = 2
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config

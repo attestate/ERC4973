@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.8;
 
-// OpenZeppelin Contracts (last updated v4.5.0) (utils/cryptography/SignatureChecker.sol)
+// OpenZeppelin Contracts (last updated v4.7.1) (utils/cryptography/SignatureChecker.sol)
 
-// OpenZeppelin Contracts (last updated v4.5.0) (utils/cryptography/ECDSA.sol)
+// OpenZeppelin Contracts (last updated v4.7.3) (utils/cryptography/ECDSA.sol)
 
-// OpenZeppelin Contracts v4.4.1 (utils/Strings.sol)
+// OpenZeppelin Contracts (last updated v4.7.0) (utils/Strings.sol)
 
 /**
  * @dev String operations.
@@ -128,9 +128,6 @@ library ECDSA {
      * _Available since v4.3._
      */
     function tryRecover(bytes32 hash, bytes memory signature) internal pure returns (address, RecoverError) {
-        // Check the signature length
-        // - case 65: r,s,v signature (standard)
-        // - case 64: r,vs signature (cf https://eips.ethereum.org/EIPS/eip-2098) _Available since v4.1._
         if (signature.length == 65) {
             bytes32 r;
             bytes32 s;
@@ -144,17 +141,6 @@ library ECDSA {
                 v := byte(0, mload(add(signature, 0x60)))
             }
             return tryRecover(hash, v, r, s);
-        } else if (signature.length == 64) {
-            bytes32 r;
-            bytes32 vs;
-            // ecrecover takes the signature parameters, and the only way to get them
-            // currently is to use assembly.
-            /// @solidity memory-safe-assembly
-            assembly {
-                r := mload(add(signature, 0x20))
-                vs := mload(add(signature, 0x40))
-            }
-            return tryRecover(hash, r, vs);
         } else {
             return (address(0), RecoverError.InvalidSignatureLength);
         }
@@ -304,7 +290,7 @@ library ECDSA {
     }
 }
 
-// OpenZeppelin Contracts (last updated v4.5.0) (utils/Address.sol)
+// OpenZeppelin Contracts (last updated v4.7.0) (utils/Address.sol)
 
 /**
  * @dev Collection of functions related to the address type
@@ -386,7 +372,7 @@ library Address {
      * _Available since v3.1._
      */
     function functionCall(address target, bytes memory data) internal returns (bytes memory) {
-        return functionCallWithValue(target, data, 0, "Address: low-level call failed");
+        return functionCall(target, data, "Address: low-level call failed");
     }
 
     /**
@@ -569,7 +555,9 @@ library SignatureChecker {
         (bool success, bytes memory result) = signer.staticcall(
             abi.encodeWithSelector(IERC1271.isValidSignature.selector, hash, signature)
         );
-        return (success && result.length == 32 && abi.decode(result, (bytes4)) == IERC1271.isValidSignature.selector);
+        return (success &&
+            result.length == 32 &&
+            abi.decode(result, (bytes32)) == bytes32(IERC1271.isValidSignature.selector));
     }
 }
 
@@ -776,212 +764,265 @@ library BitMaps {
 }
 
 interface IERC721Metadata {
-    function name() external view returns (string memory);
-    function symbol() external view returns (string memory);
-    function tokenURI(uint256 tokenId) external view returns (string memory);
+  function name() external view returns (string memory);
+  function symbol() external view returns (string memory);
+  function tokenURI(uint256 tokenId) external view returns (string memory);
 }
 
 /// @title Account-bound tokens
 /// @dev See https://eips.ethereum.org/EIPS/eip-4973
 /// Note: the ERC-165 identifier for this interface is 0xeb72bb7c
 interface IERC4973 {
-    /// @dev This emits when ownership of any ABT changes by any mechanism.
-    ///  This event emits when ABTs are given or equipped and unequipped
-    ///  (`to` == 0).
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-    /// @notice Count all ABTs assigned to an owner
-    /// @dev ABTs assigned to the zero address are considered invalid, and this
-    ///  function throws for queries about the zero address.
-    /// @param owner An address for whom to query the balance
-    /// @return The number of ABTs owned by `address owner`, possibly zero
+  /// @dev This emits when ownership of any ABT changes by any mechanism.
+  ///  This event emits when ABTs are given or equipped and unequipped
+  ///  (`to` == 0).
+  event Transfer(
+    address indexed from, address indexed to, uint256 indexed tokenId
+  );
+  /// @notice Count all ABTs assigned to an owner
+  /// @dev ABTs assigned to the zero address are considered invalid, and this
+  ///  function throws for queries about the zero address.
+  /// @param owner An address for whom to query the balance
+  /// @return The number of ABTs owned by `address owner`, possibly zero
 
-    function balanceOf(address owner) external view returns (uint256);
-    /// @notice Find the address bound to an ERC4973 account-bound token
-    /// @dev ABTs assigned to zero address are considered invalid, and queries
-    ///  about them do throw.
-    /// @param tokenId The identifier for an ABT.
-    /// @return The address of the owner bound to the ABT.
-    function ownerOf(uint256 tokenId) external view returns (address);
-    /// @notice Removes the `uint256 tokenId` from an account. At any time, an
-    ///  ABT receiver must be able to disassociate themselves from an ABT
-    ///  publicly through calling this function. After successfully executing this
-    ///  function, given the parameters for calling `function give` or
-    ///  `function take` a token must be re-equipable.
-    /// @dev Must emit a `event Transfer` with the `address to` field pointing to
-    ///  the zero address.
-    /// @param tokenId The identifier for an ABT.
-    function unequip(uint256 tokenId) external;
-    /// @notice Creates and transfers the ownership of an ABT from the
-    ///  transaction's `msg.sender` to `address to`.
-    /// @dev Throws unless `bytes signature` represents an EIP-2098 Compact
-    ///  Signature of the EIP-712 structured data hash
-    ///  `Agreement(address active,address passive,bytes metadata)` expressing
-    ///  `address to`'s explicit agreement to be publicly associated with
-    ///  `msg.sender` and `bytes metadata`. A unique `uint256 tokenId` must be
-    ///  generated by type-casting the `bytes32` EIP-712 structured data hash to a
-    ///  `uint256`. If `bytes signature` is empty or `address to` is a contract,
-    ///  an EIP-1271-compatible call to `function isValidSignatureNow(...)` must
-    ///  be made to `address to`. A successful execution must result in the
-    ///  `event Transfer(msg.sender, to, tokenId)`. Once an ABT exists as an
-    ///  `uint256 tokenId` in the contract, `function give(...)` must throw.
-    /// @param to The receiver of the ABT.
-    /// @param metadata The metadata that will be associated to the ABT.
-    /// @param signature A EIP-2098-compatible Compact Signature of the EIP-712
-    ///  structured data hash
-    ///  `Agreement(address active,address passive,bytes metadata)` signed by
-    ///  `address to`.
-    /// @return A unique `uint256 tokenId` generated by type-casting the `bytes32`
-    ///  EIP-712 structured data hash to a `uint256`.
-    function give(address to, bytes calldata metadata, bytes calldata signature) external returns (uint256);
-    /// @notice Creates and transfers the ownership of an ABT from an
-    /// `address from` to the transaction's `msg.sender`.
-    /// @dev Throws unless `bytes signature` represents an EIP-2098 Compact
-    ///  Signature of the EIP-712 structured data hash
-    ///  `Agreement(address active,address passive,bytes metadata)` expressing
-    ///  `address from`'s explicit agreement to be publicly associated with
-    ///  `msg.sender` and `bytes metadata`. A unique `uint256 tokenId` must be
-    ///  generated by type-casting the `bytes32` EIP-712 structured data hash to a
-    ///  `uint256`. If `bytes signature` is empty or `address from` is a contract,
-    ///  an EIP-1271-compatible call to `function isValidSignatureNow(...)` must
-    ///  be made to `address from`. A successful execution must result in the
-    ///  emission of an `event Transfer(from, msg.sender, tokenId)`. Once an ABT
-    ///  exists as an `uint256 tokenId` in the contract, `function take(...)` must
-    ///  throw.
-    /// @param from The origin of the ABT.
-    /// @param metadata The metadata that will be associated to the ABT.
-    /// @param signature A EIP-2098-compatible Compact Signature of the EIP-712
-    ///  structured data hash
-    ///  `Agreement(address active,address passive,bytes metadata)` signed by
-    ///  `address from`.
-    /// @return A unique `uint256 tokenId` generated by type-casting the `bytes32`
-    ///  EIP-712 structured data hash to a `uint256`.
-    function take(address from, bytes calldata metadata, bytes calldata signature) external returns (uint256);
-    /// @notice Decodes the opaque metadata bytestring of an ABT into the token
-    /// URI that will be associated with it once it is created on chain.
-    /// @param metadata The metadata that will be associated to an ABT.
-    /// @return A URI that represents the metadata.
-    function decodeURI(bytes calldata metadata) external returns (string memory);
+  function balanceOf(address owner) external view returns (uint256);
+  /// @notice Find the address bound to an ERC4973 account-bound token
+  /// @dev ABTs assigned to zero address are considered invalid, and queries
+  ///  about them do throw.
+  /// @param tokenId The identifier for an ABT.
+  /// @return The address of the owner bound to the ABT.
+  function ownerOf(uint256 tokenId) external view returns (address);
+  /// @notice Removes the `uint256 tokenId` from an account. At any time, an
+  ///  ABT receiver must be able to disassociate themselves from an ABT
+  ///  publicly through calling this function. After successfully executing this
+  ///  function, given the parameters for calling `function give` or
+  ///  `function take` a token must be re-equipable.
+  /// @dev Must emit a `event Transfer` with the `address to` field pointing to
+  ///  the zero address.
+  /// @param tokenId The identifier for an ABT.
+  function unequip(uint256 tokenId) external;
+  /// @notice Creates and transfers the ownership of an ABT from the
+  ///  transaction's `msg.sender` to `address to`.
+  /// @dev Throws unless `bytes signature` represents a signature of the
+  //   EIP-712 structured data hash
+  ///  `Agreement(address active,address passive,bytes metadata)` expressing
+  ///  `address to`'s explicit agreement to be publicly associated with
+  ///  `msg.sender` and `bytes metadata`. A unique `uint256 tokenId` must be
+  ///  generated by type-casting the `bytes32` EIP-712 structured data hash to a
+  ///  `uint256`. If `bytes signature` is empty or `address to` is a contract,
+  ///  an EIP-1271-compatible call to `function isValidSignatureNow(...)` must
+  ///  be made to `address to`. A successful execution must result in the
+  ///  `event Transfer(msg.sender, to, tokenId)`. Once an ABT exists as an
+  ///  `uint256 tokenId` in the contract, `function give(...)` must throw.
+  /// @param to The receiver of the ABT.
+  /// @param metadata The metadata that will be associated to the ABT.
+  /// @param signature A signature of the EIP-712 structured data hash
+  ///  `Agreement(address active,address passive,bytes metadata)` signed by
+  ///  `address to`.
+  /// @return A unique `uint256 tokenId` generated by type-casting the `bytes32`
+  ///  EIP-712 structured data hash to a `uint256`.
+  function give(address to, bytes calldata metadata, bytes calldata signature)
+    external
+    returns (uint256);
+  /// @notice Creates and transfers the ownership of an ABT from an
+  /// `address from` to the transaction's `msg.sender`.
+  /// @dev Throws unless `bytes signature` represents a signature of the
+  ///  EIP-712 structured data hash
+  ///  `Agreement(address active,address passive,bytes metadata)` expressing
+  ///  `address from`'s explicit agreement to be publicly associated with
+  ///  `msg.sender` and `bytes metadata`. A unique `uint256 tokenId` must be
+  ///  generated by type-casting the `bytes32` EIP-712 structured data hash to a
+  ///  `uint256`. If `bytes signature` is empty or `address from` is a contract,
+  ///  an EIP-1271-compatible call to `function isValidSignatureNow(...)` must
+  ///  be made to `address from`. A successful execution must result in the
+  ///  emission of an `event Transfer(from, msg.sender, tokenId)`. Once an ABT
+  ///  exists as an `uint256 tokenId` in the contract, `function take(...)` must
+  ///  throw.
+  /// @param from The origin of the ABT.
+  /// @param metadata The metadata that will be associated to the ABT.
+  /// @param signature A signature of the EIP-712 structured data hash
+  ///  `Agreement(address active,address passive,bytes metadata)` signed by
+  ///  `address from`.
+  /// @return A unique `uint256 tokenId` generated by type-casting the `bytes32`
+  ///  EIP-712 structured data hash to a `uint256`.
+  function take(address from, bytes calldata metadata, bytes calldata signature)
+    external
+    returns (uint256);
+  /// @notice Decodes the opaque metadata bytestring of an ABT into the token
+  ///  URI that will be associated with it once it is created on chain.
+  /// @param metadata The metadata that will be associated to an ABT.
+  /// @return A URI that represents the metadata.
+  function decodeURI(bytes calldata metadata) external returns (string memory);
 }
 
-bytes32 constant AGREEMENT_HASH = keccak256("Agreement(address active,address passive,bytes metadata)");
+bytes32 constant AGREEMENT_HASH =
+  keccak256("Agreement(address active,address passive,bytes metadata)");
 
 /// @notice Reference implementation of EIP-4973 tokens.
 /// @author Tim Daubenschütz, Rahul Rumalla (https://github.com/rugpullindex/ERC4973/blob/master/src/ERC4973.sol)
 abstract contract ERC4973 is EIP712, ERC165, IERC721Metadata, IERC4973 {
-    using BitMaps for BitMaps.BitMap;
+  using BitMaps for BitMaps.BitMap;
 
-    BitMaps.BitMap private _usedHashes;
+  BitMaps.BitMap private _usedHashes;
 
-    string private _name;
-    string private _symbol;
+  string private _name;
+  string private _symbol;
 
-    mapping(uint256 => address) private _owners;
-    mapping(uint256 => string) private _tokenURIs;
-    mapping(address => uint256) private _balances;
+  mapping(uint256 => address) private _owners;
+  mapping(uint256 => string) private _tokenURIs;
+  mapping(address => uint256) private _balances;
 
-    constructor(string memory name_, string memory symbol_, string memory version) EIP712(name_, version) {
-        _name = name_;
-        _symbol = symbol_;
-    }
+  constructor(string memory name_, string memory symbol_, string memory version)
+    EIP712(name_, version)
+  {
+    _name = name_;
+    _symbol = symbol_;
+  }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IERC721Metadata).interfaceId || interfaceId == type(IERC4973).interfaceId
-            || super.supportsInterface(interfaceId);
-    }
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override
+    returns (bool)
+  {
+    return interfaceId == type(IERC721Metadata).interfaceId
+      || interfaceId == type(IERC4973).interfaceId
+      || super.supportsInterface(interfaceId);
+  }
 
-    function name() public view virtual override returns (string memory) {
-        return _name;
-    }
+  function name() public view virtual override returns (string memory) {
+    return _name;
+  }
 
-    function symbol() public view virtual override returns (string memory) {
-        return _symbol;
-    }
+  function symbol() public view virtual override returns (string memory) {
+    return _symbol;
+  }
 
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-        require(_exists(tokenId), "tokenURI: token doesn't exist");
-        return _tokenURIs[tokenId];
-    }
+  function tokenURI(uint256 tokenId)
+    public
+    view
+    virtual
+    override
+    returns (string memory)
+  {
+    require(_exists(tokenId), "tokenURI: token doesn't exist");
+    return _tokenURIs[tokenId];
+  }
 
-    function unequip(uint256 tokenId) public virtual override {
-        require(msg.sender == ownerOf(tokenId), "unequip: sender must be owner");
-        _usedHashes.unset(tokenId);
-        _burn(tokenId);
-    }
+  function unequip(uint256 tokenId) public virtual override {
+    require(msg.sender == ownerOf(tokenId), "unequip: sender must be owner");
+    _usedHashes.unset(tokenId);
+    _burn(tokenId);
+  }
 
-    function balanceOf(address owner) public view virtual override returns (uint256) {
-        require(owner != address(0), "balanceOf: address zero is not a valid owner");
-        return _balances[owner];
-    }
+  function balanceOf(address owner)
+    public
+    view
+    virtual
+    override
+    returns (uint256)
+  {
+    require(owner != address(0), "balanceOf: address zero is not a valid owner");
+    return _balances[owner];
+  }
 
-    function ownerOf(uint256 tokenId) public view virtual returns (address) {
-        address owner = _owners[tokenId];
-        require(owner != address(0), "ownerOf: token doesn't exist");
-        return owner;
-    }
+  function ownerOf(uint256 tokenId) public view virtual returns (address) {
+    address owner = _owners[tokenId];
+    require(owner != address(0), "ownerOf: token doesn't exist");
+    return owner;
+  }
 
-    function give(address to, bytes calldata metadata, bytes calldata signature) external virtual returns (uint256) {
-        require(msg.sender != to, "give: cannot give from self");
-        uint256 tokenId = _safeCheckAgreement(msg.sender, to, metadata, signature);
-        string memory uri = decodeURI(metadata);
-        _mint(msg.sender, to, tokenId, uri);
-        _usedHashes.set(tokenId);
-        return tokenId;
-    }
+  function give(address to, bytes calldata metadata, bytes calldata signature)
+    external
+    virtual
+    returns (uint256)
+  {
+    require(msg.sender != to, "give: cannot give from self");
+    uint256 tokenId = _safeCheckAgreement(msg.sender, to, metadata, signature);
+    string memory uri = decodeURI(metadata);
+    _mint(msg.sender, to, tokenId, uri);
+    _usedHashes.set(tokenId);
+    return tokenId;
+  }
 
-    function take(address from, bytes calldata metadata, bytes calldata signature) external virtual returns (uint256) {
-        require(msg.sender != from, "take: cannot take from self");
-        uint256 tokenId = _safeCheckAgreement(msg.sender, from, metadata, signature);
-        string memory uri = decodeURI(metadata);
-        _mint(from, msg.sender, tokenId, uri);
-        _usedHashes.set(tokenId);
-        return tokenId;
-    }
+  function take(address from, bytes calldata metadata, bytes calldata signature)
+    external
+    virtual
+    returns (uint256)
+  {
+    require(msg.sender != from, "take: cannot take from self");
+    uint256 tokenId = _safeCheckAgreement(msg.sender, from, metadata, signature);
+    string memory uri = decodeURI(metadata);
+    _mint(from, msg.sender, tokenId, uri);
+    _usedHashes.set(tokenId);
+    return tokenId;
+  }
 
-    function decodeURI(bytes calldata metadata) public virtual returns (string memory) {
-        return string(metadata);
-    }
+  function decodeURI(bytes calldata metadata)
+    public
+    virtual
+    returns (string memory)
+  {
+    return string(metadata);
+  }
 
-    function _safeCheckAgreement(address active, address passive, bytes calldata metadata, bytes calldata signature)
-        internal
-        virtual
-        returns (uint256)
-    {
-        bytes32 hash = _getHash(active, passive, metadata);
-        uint256 tokenId = uint256(hash);
+  function _safeCheckAgreement(
+    address active,
+    address passive,
+    bytes calldata metadata,
+    bytes calldata signature
+  )
+    internal
+    virtual
+    returns (uint256)
+  {
+    bytes32 hash = _getHash(active, passive, metadata);
+    uint256 tokenId = uint256(hash);
 
-        require(
-            SignatureChecker.isValidSignatureNow(passive, hash, signature), "_safeCheckAgreement: invalid signature"
-        );
-        require(!_usedHashes.get(tokenId), "_safeCheckAgreement: already used");
-        return tokenId;
-    }
+    require(
+      SignatureChecker.isValidSignatureNow(passive, hash, signature),
+      "_safeCheckAgreement: invalid signature"
+    );
+    require(!_usedHashes.get(tokenId), "_safeCheckAgreement: already used");
+    return tokenId;
+  }
 
-    function _getHash(address active, address passive, bytes calldata metadata) internal view returns (bytes32) {
-        bytes32 structHash = keccak256(abi.encode(AGREEMENT_HASH, active, passive, keccak256(metadata)));
-        return _hashTypedDataV4(structHash);
-    }
+  function _getHash(address active, address passive, bytes calldata metadata)
+    internal
+    view
+    returns (bytes32)
+  {
+    bytes32 structHash =
+      keccak256(abi.encode(AGREEMENT_HASH, active, passive, keccak256(metadata)));
+    return _hashTypedDataV4(structHash);
+  }
 
-    function _exists(uint256 tokenId) internal view virtual returns (bool) {
-        return _owners[tokenId] != address(0);
-    }
+  function _exists(uint256 tokenId) internal view virtual returns (bool) {
+    return _owners[tokenId] != address(0);
+  }
 
-    function _mint(address from, address to, uint256 tokenId, string memory uri) internal virtual returns (uint256) {
-        require(!_exists(tokenId), "mint: tokenID exists");
-        _balances[to] += 1;
-        _owners[tokenId] = to;
-        _tokenURIs[tokenId] = uri;
-        emit Transfer(from, to, tokenId);
-        return tokenId;
-    }
+  function _mint(address from, address to, uint256 tokenId, string memory uri)
+    internal
+    virtual
+    returns (uint256)
+  {
+    require(!_exists(tokenId), "mint: tokenID exists");
+    _balances[to] += 1;
+    _owners[tokenId] = to;
+    _tokenURIs[tokenId] = uri;
+    emit Transfer(from, to, tokenId);
+    return tokenId;
+  }
 
-    function _burn(uint256 tokenId) internal virtual {
-        address owner = ownerOf(tokenId);
+  function _burn(uint256 tokenId) internal virtual {
+    address owner = ownerOf(tokenId);
 
-        _balances[owner] -= 1;
-        delete _owners[tokenId];
-        delete _tokenURIs[tokenId];
+    _balances[owner] -= 1;
+    delete _owners[tokenId];
+    delete _tokenURIs[tokenId];
 
-        emit Transfer(owner, address(0), tokenId);
-    }
+    emit Transfer(owner, address(0), tokenId);
+  }
 }
 
