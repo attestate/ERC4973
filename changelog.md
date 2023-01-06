@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0
+
+- Removed EIP-2098 support as EIP-1271 expects a "naively" concatenated
+  signature and not an EIP-2098-style compact signature. This was pushed
+  upstream with @frangio removing support for EIP-2098 in the
+  `SignatureChecker` library.
+- Change `string tokenURI` in structure data hash and `give` and `take` inputs
+  to a more generic `bytes metadata`. PR:
+  https://github.com/attestate/ERC4973/pull/52
+- Start using `forge fmt` for all Solidity code formatting
+
 ## 0.4.0
 
 - Comply with standard specification at:
