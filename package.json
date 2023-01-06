@@ -1,6 +1,6 @@
 {
   "name": "erc4973",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A standard interface for non-transferrable non-fungible tokens, also known as \"account-bound\" or \"soulbound tokens\" or \"badges\".",
   "files": [
     "/src/ERC4973.sol",
