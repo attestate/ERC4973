@@ -16,7 +16,11 @@ contract ERC1271Mock {
         pass = pass_;
     }
 
-    function isValidSignature(bytes32 hash, bytes memory signature) public view returns (bytes4) {
+    function isValidSignature(bytes32 hash, bytes memory signature)
+        public
+        view
+        returns (bytes4)
+    {
         if (pass) {
             return MAGICVALUE;
         } else {
@@ -28,7 +32,12 @@ contract ERC1271Mock {
 contract AccountAbstraction is ERC1271Mock {
     constructor(bool pass) ERC1271Mock(pass) {}
 
-    function give(address collection, address to, bytes calldata metadata, bytes calldata signature)
+    function give(
+        address collection,
+        address to,
+        bytes calldata metadata,
+        bytes calldata signature
+    )
         external
         virtual
         returns (uint256)
@@ -36,7 +45,12 @@ contract AccountAbstraction is ERC1271Mock {
         return ERC4973(collection).give(to, metadata, signature);
     }
 
-    function take(address collection, address from, bytes calldata metadata, bytes calldata signature)
+    function take(
+        address collection,
+        address from,
+        bytes calldata metadata,
+        bytes calldata signature
+    )
         external
         virtual
         returns (uint256)
@@ -52,11 +66,23 @@ contract AccountAbstraction is ERC1271Mock {
 contract AccountBoundToken is ERC4973 {
     constructor() ERC4973("Name", "Symbol", "Version") {}
 
-    function getHash(address from, address to, bytes calldata metadata) public view returns (bytes32) {
+    function getHash(address from, address to, bytes calldata metadata)
+        public
+        view
+        returns (bytes32)
+    {
         return _getHash(from, to, metadata);
     }
 
-    function mint(address from, address to, uint256 tokenId, string calldata uri) external returns (uint256) {
+    function mint(
+        address from,
+        address to,
+        uint256 tokenId,
+        string calldata uri
+    )
+        external
+        returns (uint256)
+    {
         return _mint(from, to, tokenId, uri);
     }
 }
@@ -75,11 +101,14 @@ contract ERC4973Test is Test {
     AccountAbstraction aa;
 
     address passiveAddress = 0x0f6A79A579658E401E0B81c6dde1F2cd51d97176;
-    uint256 passivePrivateKey = 0xad54bdeade5537fb0a553190159783e45d02d316a992db05cbed606d3ca36b39;
+    uint256 passivePrivateKey =
+        0xad54bdeade5537fb0a553190159783e45d02d316a992db05cbed606d3ca36b39;
 
     string constant tokenURI = "https://example.com/metadata.json";
 
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+    event Transfer(
+        address indexed from, address indexed to, uint256 indexed tokenId
+    );
 
     function setUp() public {
         abt = new AccountBoundToken();
