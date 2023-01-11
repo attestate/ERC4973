@@ -11,16 +11,59 @@ import {ERC721URIStorage} from
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
 import {IERC4973} from "./interfaces/IERC4973.sol";
+import {IERC5192} from "./interfaces/IERC5192.sol";
 
 bytes32 constant AGREEMENT_HASH =
   keccak256("Agreement(address active,address passive,bytes metadata)");
 
 /// @notice Reference implementation of EIP-4973 tokens.
 /// @author Tim Daubenschütz, Rahul Rumalla (https://github.com/rugpullindex/ERC4973/blob/master/src/ERC4973.sol)
-abstract contract ERC4973 is EIP712, ERC721, ERC721URIStorage, IERC4973 {
+abstract contract ERC4973 is
+  EIP712,
+  ERC721,
+  ERC721URIStorage,
+  IERC4973,
+  IERC5192
+{
   using BitMaps for BitMaps.BitMap;
 
   BitMaps.BitMap private _usedHashes;
+
+  modifier notSupported() {
+    revert("notSupported: Soulbound NFT EIP-5192");
+    _;
+  }
+
+  function getApproved(uint256) public pure override returns (address) {
+    return address(0x0);
+  }
+
+  function isApprovedForAll(address, address)
+    public
+    pure
+    override
+    returns (bool)
+  {
+    return false;
+  }
+
+  function approve(address, uint256) public override notSupported {}
+
+  function setApprovalForAll(address, bool) public override notSupported {}
+
+  function transferFrom(address, address, uint256) public override notSupported {}
+
+  function safeTransferFrom(address, address, uint256)
+    public
+    override
+    notSupported
+  {}
+
+  function safeTransferFrom(address, address, uint256, bytes memory)
+    public
+    override
+    notSupported
+  {}
 
   constructor(string memory name, string memory symbol, string memory version)
     EIP712(name, version)
@@ -40,12 +83,9 @@ abstract contract ERC4973 is EIP712, ERC721, ERC721URIStorage, IERC4973 {
     return super.tokenURI(tokenId);
   }
 
-  function decodeURI(bytes calldata metadata)
-    public
-    virtual
-    returns (string memory)
-  {
-    return string(metadata);
+  function locked(uint256 tokenId) external view returns (bool) {
+    require(_exists(tokenId), "locked: tokenId doesn't exist");
+    return true;
   }
 
   function supportsInterface(bytes4 interfaceId)
@@ -56,6 +96,7 @@ abstract contract ERC4973 is EIP712, ERC721, ERC721URIStorage, IERC4973 {
     returns (bool)
   {
     return interfaceId == type(IERC4973).interfaceId
+      || interfaceId == type(IERC5192).interfaceId
       || super.supportsInterface(interfaceId);
   }
 
@@ -75,7 +116,8 @@ abstract contract ERC4973 is EIP712, ERC721, ERC721URIStorage, IERC4973 {
     string memory uri = decodeURI(metadata);
     _safeMint(msg.sender, tokenId);
     _setTokenURI(tokenId, uri);
-    transferFrom(msg.sender, to, tokenId);
+    _transfer(msg.sender, to, tokenId);
+    emit Locked(tokenId);
     _usedHashes.set(tokenId);
     return tokenId;
   }
@@ -91,8 +133,17 @@ abstract contract ERC4973 is EIP712, ERC721, ERC721URIStorage, IERC4973 {
     _safeMint(from, tokenId);
     _setTokenURI(tokenId, uri);
     _transfer(from, msg.sender, tokenId);
+    emit Locked(tokenId);
     _usedHashes.set(tokenId);
     return tokenId;
+  }
+
+  function decodeURI(bytes calldata metadata)
+    public
+    virtual
+    returns (string memory)
+  {
+    return string(metadata);
   }
 
   function _safeCheckAgreement(

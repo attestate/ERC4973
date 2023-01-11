@@ -4,7 +4,7 @@ pragma solidity ^0.8.6;
 /// @title Account-bound tokens
 /// @dev See https://eips.ethereum.org/EIPS/eip-4973
 /// Note: the ERC-165 identifier for this interface is 0xf8801853.
-interface IERC4973 /* is IERC721, IERC721Metadata */ {
+interface IERC4973 { /* is IERC721, IERC721Metadata */
   /// @notice Removes the `uint256 tokenId` from an account. At any time, an
   ///  ABT receiver must be able to disassociate themselves from an ABT
   ///  publicly through calling this function. After successfully executing this

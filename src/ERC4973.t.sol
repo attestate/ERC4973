@@ -4,11 +4,13 @@ pragma solidity ^0.8.6;
 import "forge-std/Test.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {ERC721Holder} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import {ERC721Holder} from
+  "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import {IERC721Metadata} from
   "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 
 import {IERC4973} from "./interfaces/IERC4973.sol";
+import {IERC5192} from "./interfaces/IERC5192.sol";
 import {ERC4973} from "./ERC4973.sol";
 
 contract ERC1271Mock is ERC721Holder {
@@ -104,6 +106,7 @@ contract ERC4973Test is Test, ERC721Holder {
   event Transfer(
     address indexed from, address indexed to, uint256 indexed tokenId
   );
+  event Locked(uint256 tokenId);
 
   function setUp() public {
     abt = new AccountBoundToken();
@@ -128,6 +131,26 @@ contract ERC4973Test is Test, ERC721Holder {
     bytes4 interfaceId = type(IERC4973).interfaceId;
     assertEq(interfaceId, bytes4(0xf8801853));
     assertTrue(abt.supportsInterface(interfaceId));
+  }
+
+  function testIERC5192() public {
+    assertTrue(abt.supportsInterface(type(IERC5192).interfaceId));
+  }
+
+  function testCallingLockedWithNonExistentTokenId() public {
+    vm.expectRevert(bytes("locked: tokenId doesn't exist"));
+    abt.locked(1337);
+  }
+
+  function testCallingLockedWithExistentTokenId() public {
+    address from = address(0);
+    address to = address(this);
+    uint256 tokenId = 0;
+
+    vm.expectEmit(true, true, true, false);
+    emit Transfer(from, to, tokenId);
+    abt.mint(to, tokenId);
+    assertTrue(abt.locked(tokenId));
   }
 
   function testUnequippingAsNonAuthorizedAccount() public {
