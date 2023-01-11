@@ -3,12 +3,15 @@ pragma solidity ^0.8.6;
 
 import "forge-std/Test.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {ERC721Holder} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import {IERC721Metadata} from
+  "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 
-import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
 import {IERC4973} from "./interfaces/IERC4973.sol";
 import {ERC4973} from "./ERC4973.sol";
 
-contract ERC1271Mock {
+contract ERC1271Mock is ERC721Holder {
   bytes4 internal constant MAGICVALUE = 0x1626ba7e;
   bool private pass;
 
@@ -63,6 +66,13 @@ contract AccountAbstraction is ERC1271Mock {
   }
 }
 
+contract NonAuthorizedCaller is ERC721Holder {
+  function unequip(address collection, uint256 tokenId) external {
+    AccountBoundToken abt = AccountBoundToken(collection);
+    abt.unequip(tokenId);
+  }
+}
+
 contract AccountBoundToken is ERC4973 {
   constructor() ERC4973("Name", "Symbol", "Version") {}
 
@@ -74,22 +84,12 @@ contract AccountBoundToken is ERC4973 {
     return _getHash(from, to, metadata);
   }
 
-  function mint(address from, address to, uint256 tokenId, string calldata uri)
-    external
-    returns (uint256)
-  {
-    return _mint(from, to, tokenId, uri);
+  function mint(address to, uint256 tokenId) external {
+    _mint(to, tokenId);
   }
 }
 
-contract NonAuthorizedCaller {
-  function unequip(address collection, uint256 tokenId) external {
-    AccountBoundToken abt = AccountBoundToken(collection);
-    abt.unequip(tokenId);
-  }
-}
-
-contract ERC4973Test is Test {
+contract ERC4973Test is Test, ERC721Holder {
   ERC1271Mock approver;
   ERC1271Mock rejecter;
   AccountBoundToken abt;
@@ -112,6 +112,10 @@ contract ERC4973Test is Test {
     aa = new AccountAbstraction(true);
   }
 
+  function testIERC721() public {
+    assertTrue(abt.supportsInterface(type(IERC721).interfaceId));
+  }
+
   function testIERC165() public {
     assertTrue(abt.supportsInterface(type(IERC165).interfaceId));
   }
@@ -122,89 +126,8 @@ contract ERC4973Test is Test {
 
   function testIERC4973() public {
     bytes4 interfaceId = type(IERC4973).interfaceId;
-    assertEq(interfaceId, bytes4(0xeb72bb7c));
+    assertEq(interfaceId, bytes4(0xf8801853));
     assertTrue(abt.supportsInterface(interfaceId));
-  }
-
-  function testCheckMetadata() public {
-    assertEq(abt.name(), "Name");
-    assertEq(abt.symbol(), "Symbol");
-  }
-
-  function testIfEmptyAddressReturnsBalanceZero() public {
-    assertEq(abt.balanceOf(address(1337)), 0);
-  }
-
-  function testThrowOnZeroAddress() public {
-    vm.expectRevert(bytes("balanceOf: address zero is not a valid owner"));
-    abt.balanceOf(address(0));
-  }
-
-  function testBalanceIncreaseAfterMint() public {
-    address from = address(0);
-    address to = msg.sender;
-    assertEq(abt.balanceOf(to), 0);
-    uint256 tokenId = 0;
-
-    vm.expectEmit(true, true, true, false);
-    emit Transfer(from, to, tokenId);
-    abt.mint(from, to, tokenId, tokenURI);
-
-    assertEq(abt.balanceOf(to), 1);
-  }
-
-  function testBalanceIncreaseAfterMintAndUnequip() public {
-    address from = address(0);
-    address to = address(this);
-    assertEq(abt.balanceOf(to), 0);
-    uint256 tokenId = 0;
-
-    vm.expectEmit(true, true, true, false);
-    emit Transfer(from, to, tokenId);
-    abt.mint(from, to, tokenId, tokenURI);
-
-    assertEq(abt.balanceOf(to), 1);
-    abt.unequip(tokenId);
-    assertEq(abt.balanceOf(to), 0);
-  }
-
-  function testMint() public {
-    address from = address(0);
-    uint256 tokenId = 0;
-
-    vm.expectEmit(true, true, true, false);
-    emit Transfer(from, msg.sender, tokenId);
-    abt.mint(from, msg.sender, tokenId, tokenURI);
-
-    assertEq(abt.tokenURI(tokenId), tokenURI);
-    assertEq(abt.ownerOf(tokenId), msg.sender);
-  }
-
-  function testMintToExternalAddress() public {
-    address from = address(0);
-    address thirdparty = address(1337);
-    uint256 tokenId = 0;
-
-    vm.expectEmit(true, true, true, false);
-    emit Transfer(from, thirdparty, tokenId);
-    abt.mint(from, thirdparty, tokenId, tokenURI);
-
-    assertEq(abt.tokenURI(tokenId), tokenURI);
-    assertEq(abt.ownerOf(tokenId), thirdparty);
-  }
-
-  function testMintAndUnequip() public {
-    address from = address(0);
-    address to = address(this);
-    uint256 tokenId = 0;
-
-    vm.expectEmit(true, true, true, false);
-    emit Transfer(from, to, tokenId);
-    abt.mint(from, to, tokenId, tokenURI);
-
-    assertEq(abt.ownerOf(tokenId), to);
-    assertEq(abt.tokenURI(tokenId), tokenURI);
-    abt.unequip(tokenId);
   }
 
   function testUnequippingAsNonAuthorizedAccount() public {
@@ -214,10 +137,9 @@ contract ERC4973Test is Test {
 
     vm.expectEmit(true, true, true, false);
     emit Transfer(from, to, tokenId);
-    abt.mint(from, to, tokenId, tokenURI);
+    abt.mint(to, tokenId);
 
     assertEq(abt.ownerOf(tokenId), to);
-    assertEq(abt.tokenURI(tokenId), tokenURI);
 
     NonAuthorizedCaller nac = new NonAuthorizedCaller();
     vm.expectRevert(bytes("unequip: sender must be owner"));
@@ -232,37 +154,14 @@ contract ERC4973Test is Test {
 
     vm.expectEmit(true, true, true, false);
     emit Transfer(from, to, tokenId);
-    abt.mint(from, to, tokenId, tokenURI);
+    abt.mint(to, tokenId);
 
     assertEq(abt.ownerOf(tokenId), to);
-    assertEq(abt.tokenURI(tokenId), tokenURI);
 
     NonAuthorizedCaller nac = new NonAuthorizedCaller();
-    vm.expectRevert(bytes("ownerOf: token doesn't exist"));
+    vm.expectRevert(bytes("ERC721: invalid token ID"));
 
     nac.unequip(address(abt), 1337);
-  }
-
-  function testFailToMintTokenToPreexistingTokenId() public {
-    address from = address(0);
-    uint256 tokenId = 0;
-
-    vm.expectEmit(true, true, true, false);
-    emit Transfer(from, msg.sender, tokenId);
-    abt.mint(from, msg.sender, tokenId, tokenURI);
-
-    assertEq(abt.tokenURI(tokenId), tokenURI);
-    assertEq(abt.ownerOf(tokenId), msg.sender);
-
-    abt.mint(from, msg.sender, tokenId, tokenURI);
-  }
-
-  function testFailRequestingNonExistentTokenURI() public view {
-    abt.tokenURI(1337);
-  }
-
-  function testFailGetBonderOfNonExistentTokenId() public view {
-    abt.ownerOf(1337);
   }
 
   function testGiveWithRejectingERC1271Contract() public {
