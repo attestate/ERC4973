@@ -24,11 +24,11 @@ test("generating a compact signature for function give", async (t) => {
     name: "Name",
     version: "Version",
     chainId: 31337, // the chainId of foundry
-    verifyingContract: "0xce71065d4017f316ec606fe4422e11eb2c47c246",
+    verifyingContract: "0x5615deb798bb3e4dfa0139dfa1b3d433cc23b72f",
   };
 
   const agreement = {
-    active: "0xb4c79dab8f259c7aee6e5b2aa729821864227e84",
+    active: "0x7fa9385be102ac3eac297483dd6233d62b3e1496",
     passive: passiveAddress,
     metadata: utils.toUtf8Bytes("https://example.com/metadata.json"),
   };
@@ -38,6 +38,6 @@ test("generating a compact signature for function give", async (t) => {
   t.is(signature.length, 64 + 64 + 2 + 2);
   t.is(
     signature,
-    "0x4473afdec84287f10aa0b5eb608d360e2e9220bee657a4a5ca468e69a4de255c38691fca0c52f295d1831beaa0b7f079c1ab7959257578d2fb8d98740d9b0e111c"
+    "0x0e1183b212232b4f1c3e11edd00059fb01710c0335b81c11a43d11d5b7cd01d55483b1a1432f76c4d3cab1bb2607622fd173f8f3d6bdbe8927c4706f9be447321b"
   );
 });

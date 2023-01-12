@@ -345,8 +345,13 @@ contract ERC4973Test is Test, ERC721Holder {
     bytes32 hash = abt.getHash(from, to, bytes(tokenURI));
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
     bytes memory signature = abi.encodePacked(r, s, v);
+    // NOTE: This hex signature value may go out of sync at one point with the
+    // SDK.  Don't panic then! The most likely reason is that e.g. the `address
+    // from` which is this test contract, or the verifying address in the
+    // EIP-712 set up have changed! So check them, update the code and see if
+    // you can establish lock step again!
     bytes memory expected =
-      hex"4473afdec84287f10aa0b5eb608d360e2e9220bee657a4a5ca468e69a4de255c38691fca0c52f295d1831beaa0b7f079c1ab7959257578d2fb8d98740d9b0e111c";
+      hex"0e1183b212232b4f1c3e11edd00059fb01710c0335b81c11a43d11d5b7cd01d55483b1a1432f76c4d3cab1bb2607622fd173f8f3d6bdbe8927c4706f9be447321b";
     assertEq(signature, expected);
 
     uint256 tokenId = abt.give(to, bytes(tokenURI), signature);
@@ -396,8 +401,13 @@ contract ERC4973Test is Test, ERC721Holder {
     bytes32 hash = abt.getHash(to, passiveAddress, bytes(tokenURI));
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(passivePrivateKey, hash);
     bytes memory signature = abi.encodePacked(r, s, v);
+    // NOTE: This hex signature value may go out of sync at one point with the
+    // SDK.  Don't panic then! The most likely reason is that e.g. the `address
+    // from` which is this test contract, or the verifying address in the
+    // EIP-712 set up have changed! So check them, update the code and see if
+    // you can establish lock step again!
     bytes memory expected =
-      hex"4473afdec84287f10aa0b5eb608d360e2e9220bee657a4a5ca468e69a4de255c38691fca0c52f295d1831beaa0b7f079c1ab7959257578d2fb8d98740d9b0e111c";
+      hex"0e1183b212232b4f1c3e11edd00059fb01710c0335b81c11a43d11d5b7cd01d55483b1a1432f76c4d3cab1bb2607622fd173f8f3d6bdbe8927c4706f9be447321b";
     assertEq(signature, expected);
 
     uint256 tokenId = abt.take(passiveAddress, bytes(tokenURI), signature);
