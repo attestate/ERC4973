@@ -233,6 +233,44 @@ contract ERC4973Test is Test, ERC721Holder {
     abt.take(from, bytes(tokenURI), signature);
   }
 
+  function testGiveEmits() public {
+    address from = address(this);
+    address to = address(approver);
+    bytes memory metadata = bytes(tokenURI);
+    bytes32 hash = abt.getHash(from, to, metadata);
+    uint256 tokenId = uint256(hash);
+    bytes memory signature;
+
+    vm.expectEmit(true, true, true, false, address(abt));
+    emit Transfer(address(0), address(this), tokenId);
+    emit Transfer(address(this), to, tokenId);
+    emit Locked(tokenId);
+    abt.give(to, metadata, signature);
+
+    assertEq(abt.balanceOf(to), 1);
+    assertEq(abt.tokenURI(tokenId), tokenURI);
+    assertEq(abt.ownerOf(tokenId), to);
+  }
+
+  function testTakeEmits() public {
+    address to = address(this);
+    address from = address(approver);
+    bytes memory metadata = bytes(tokenURI);
+    bytes32 hash = abt.getHash(to, from, metadata);
+    uint256 tokenId = uint256(hash);
+    bytes memory signature;
+
+    vm.expectEmit(true, true, true, false, address(abt));
+    emit Transfer(address(0), from, tokenId);
+    emit Transfer(from, to, tokenId);
+    emit Locked(tokenId);
+    abt.take(from, metadata, signature);
+
+    assertEq(abt.balanceOf(to), 1);
+    assertEq(abt.tokenURI(tokenId), tokenURI);
+    assertEq(abt.ownerOf(tokenId), to);
+  }
+
   function testGiveWithApprovingERC1271Contract() public {
     address to = address(approver);
     bytes memory signature;
