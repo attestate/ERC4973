@@ -115,6 +115,36 @@ contract ERC4973Test is Test, ERC721Holder {
     aa = new AccountAbstraction(true);
   }
 
+  function testBlockingERC721AccordingToERC5192() public {
+    address from = address(0);
+    address to = address(this);
+    uint256 tokenId = 0;
+
+    vm.expectEmit(true, true, true, false);
+    emit Transfer(from, to, tokenId);
+    abt.mint(to, tokenId);
+
+    bytes memory data;
+    vm.expectRevert(bytes("notSupported: Soulbound NFT EIP-5192"));
+    abt.safeTransferFrom(address(this), address(1), tokenId, data);
+
+    vm.expectRevert(bytes("notSupported: Soulbound NFT EIP-5192"));
+    abt.safeTransferFrom(address(this), address(1), tokenId);
+
+    vm.expectRevert(bytes("notSupported: Soulbound NFT EIP-5192"));
+    abt.transferFrom(address(this), address(1), tokenId);
+
+    vm.expectRevert(bytes("notSupported: Soulbound NFT EIP-5192"));
+    abt.approve(address(1), tokenId);
+
+    vm.expectRevert(bytes("notSupported: Soulbound NFT EIP-5192"));
+    abt.setApprovalForAll(address(1), true);
+
+    assertEq(address(0), abt.getApproved(tokenId));
+
+    assertFalse(abt.isApprovedForAll(address(this), address(0)));
+  }
+
   function testIERC721() public {
     assertTrue(abt.supportsInterface(type(IERC721).interfaceId));
   }

@@ -34,6 +34,24 @@ abstract contract ERC4973 is
     _;
   }
 
+  function safeTransferFrom(address, address, uint256, bytes memory)
+    public
+    override
+    notSupported
+  {}
+
+  function safeTransferFrom(address, address, uint256)
+    public
+    override
+    notSupported
+  {}
+
+  function transferFrom(address, address, uint256) public override notSupported {}
+
+  function approve(address, uint256) public override notSupported {}
+
+  function setApprovalForAll(address, bool) public override notSupported {}
+
   function getApproved(uint256) public pure override returns (address) {
     return address(0x0);
   }
@@ -46,24 +64,6 @@ abstract contract ERC4973 is
   {
     return false;
   }
-
-  function approve(address, uint256) public override notSupported {}
-
-  function setApprovalForAll(address, bool) public override notSupported {}
-
-  function transferFrom(address, address, uint256) public override notSupported {}
-
-  function safeTransferFrom(address, address, uint256)
-    public
-    override
-    notSupported
-  {}
-
-  function safeTransferFrom(address, address, uint256, bytes memory)
-    public
-    override
-    notSupported
-  {}
 
   constructor(string memory name, string memory symbol, string memory version)
     EIP712(name, version)
@@ -83,9 +83,13 @@ abstract contract ERC4973 is
     return super.tokenURI(tokenId);
   }
 
-  function locked(uint256 tokenId) external view returns (bool) {
+  function _locked(uint256 tokenId) internal view returns (bool) {
     require(_exists(tokenId), "locked: tokenId doesn't exist");
     return true;
+  }
+
+  function locked(uint256 tokenId) external view returns (bool) {
+    return _locked(tokenId);
   }
 
   function supportsInterface(bytes4 interfaceId)
