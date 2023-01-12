@@ -70,14 +70,14 @@ abstract contract ERC4973 is
     ERC721(name, symbol)
   {}
 
-  function _burn(uint256 tokenId) internal override (ERC721, ERC721URIStorage) {
+  function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
     super._burn(tokenId);
   }
 
   function tokenURI(uint256 tokenId)
     public
     view
-    override (ERC721, ERC721URIStorage)
+    override(ERC721, ERC721URIStorage)
     returns (string memory)
   {
     return super.tokenURI(tokenId);
@@ -155,11 +155,7 @@ abstract contract ERC4973 is
     address passive,
     bytes calldata metadata,
     bytes calldata signature
-  )
-    internal
-    virtual
-    returns (uint256)
-  {
+  ) internal virtual returns (uint256) {
     bytes32 hash = _getHash(active, passive, metadata);
     uint256 tokenId = uint256(hash);
 
@@ -176,8 +172,9 @@ abstract contract ERC4973 is
     view
     returns (bytes32)
   {
-    bytes32 structHash =
-      keccak256(abi.encode(AGREEMENT_HASH, active, passive, keccak256(metadata)));
+    bytes32 structHash = keccak256(
+      abi.encode(AGREEMENT_HASH, active, passive, keccak256(metadata))
+    );
     return _hashTypedDataV4(structHash);
   }
 }

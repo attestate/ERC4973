@@ -42,11 +42,7 @@ contract AccountAbstraction is ERC1271Mock {
     address to,
     bytes calldata metadata,
     bytes calldata signature
-  )
-    external
-    virtual
-    returns (uint256)
-  {
+  ) external virtual returns (uint256) {
     return ERC4973(collection).give(to, metadata, signature);
   }
 
@@ -55,11 +51,7 @@ contract AccountAbstraction is ERC1271Mock {
     address from,
     bytes calldata metadata,
     bytes calldata signature
-  )
-    external
-    virtual
-    returns (uint256)
-  {
+  ) external virtual returns (uint256) {
     return ERC4973(collection).take(from, metadata, signature);
   }
 
