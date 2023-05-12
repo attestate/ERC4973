@@ -5,8 +5,7 @@ import {SignatureChecker} from
   "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import {EIP712} from
   "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {ERC721URIStorage} from
+import {ERC721, ERC721URIStorage} from
   "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
@@ -17,7 +16,7 @@ bytes32 constant AGREEMENT_HASH =
 
 /// @notice Reference implementation of EIP-4973 tokens.
 /// @author Tim Daubenschütz, Rahul Rumalla (https://github.com/rugpullindex/ERC4973/blob/master/src/ERC4973.sol)
-abstract contract ERC4973 is EIP712, ERC721, ERC721URIStorage, IERC4973 {
+abstract contract ERC4973 is EIP712, ERC721URIStorage, IERC4973 {
   using BitMaps for BitMaps.BitMap;
 
   BitMaps.BitMap private _usedHashes;
@@ -26,19 +25,6 @@ abstract contract ERC4973 is EIP712, ERC721, ERC721URIStorage, IERC4973 {
     EIP712(name, version)
     ERC721(name, symbol)
   {}
-
-  function _burn(uint256 tokenId) internal override (ERC721, ERC721URIStorage) {
-    super._burn(tokenId);
-  }
-
-  function tokenURI(uint256 tokenId)
-    public
-    view
-    override (ERC721, ERC721URIStorage)
-    returns (string memory)
-  {
-    return super.tokenURI(tokenId);
-  }
 
   function decodeURI(bytes calldata metadata)
     public
