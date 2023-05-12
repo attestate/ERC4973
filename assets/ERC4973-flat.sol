@@ -661,6 +661,8 @@ abstract contract EIP712 {
     }
 }
 
+// OpenZeppelin Contracts (last updated v4.7.0) (token/ERC721/extensions/ERC721URIStorage.sol)
+
 // OpenZeppelin Contracts (last updated v4.7.0) (token/ERC721/ERC721.sol)
 
 // OpenZeppelin Contracts (last updated v4.7.0) (token/ERC721/IERC721.sol)
@@ -1362,8 +1364,6 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     ) internal virtual {}
 }
 
-// OpenZeppelin Contracts (last updated v4.7.0) (token/ERC721/extensions/ERC721URIStorage.sol)
-
 /**
  * @dev ERC721 token with storage based token URI management.
  */
@@ -1546,7 +1546,7 @@ bytes32 constant AGREEMENT_HASH =
 
 /// @notice Reference implementation of EIP-4973 tokens.
 /// @author Tim Daubenschütz, Rahul Rumalla (https://github.com/rugpullindex/ERC4973/blob/master/src/ERC4973.sol)
-abstract contract ERC4973 is EIP712, ERC721, ERC721URIStorage, IERC4973 {
+abstract contract ERC4973 is EIP712, ERC721URIStorage, IERC4973 {
   using BitMaps for BitMaps.BitMap;
 
   BitMaps.BitMap private _usedHashes;
@@ -1555,19 +1555,6 @@ abstract contract ERC4973 is EIP712, ERC721, ERC721URIStorage, IERC4973 {
     EIP712(name, version)
     ERC721(name, symbol)
   {}
-
-  function _burn(uint256 tokenId) internal override (ERC721, ERC721URIStorage) {
-    super._burn(tokenId);
-  }
-
-  function tokenURI(uint256 tokenId)
-    public
-    view
-    override (ERC721, ERC721URIStorage)
-    returns (string memory)
-  {
-    return super.tokenURI(tokenId);
-  }
 
   function decodeURI(bytes calldata metadata)
     public
