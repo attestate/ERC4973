@@ -5,8 +5,10 @@ import {SignatureChecker} from
   "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import {EIP712} from
   "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-import {ERC721, ERC721URIStorage} from
-  "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import {
+  ERC721,
+  ERC721URIStorage
+} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
 import {IERC4973} from "./interfaces/IERC4973.sol";
@@ -86,11 +88,7 @@ abstract contract ERC4973 is EIP712, ERC721URIStorage, IERC4973 {
     address passive,
     bytes calldata metadata,
     bytes calldata signature
-  )
-    internal
-    virtual
-    returns (uint256)
-  {
+  ) internal virtual returns (uint256) {
     bytes32 hash = _getHash(active, passive, metadata);
     uint256 tokenId = uint256(hash);
 
@@ -107,8 +105,9 @@ abstract contract ERC4973 is EIP712, ERC721URIStorage, IERC4973 {
     view
     returns (bytes32)
   {
-    bytes32 structHash =
-      keccak256(abi.encode(AGREEMENT_HASH, active, passive, keccak256(metadata)));
+    bytes32 structHash = keccak256(
+      abi.encode(AGREEMENT_HASH, active, passive, keccak256(metadata))
+    );
     return _hashTypedDataV4(structHash);
   }
 }
