@@ -1477,7 +1477,7 @@ library BitMaps {
 /// @title Account-bound tokens
 /// @dev See https://eips.ethereum.org/EIPS/eip-4973
 /// Note: the ERC-165 identifier for this interface is 0xf8801853.
-interface IERC4973 /* is IERC721, IERC721Metadata */ {
+interface IERC4973 { /* is IERC721, IERC721Metadata */
   /// @notice Removes the `uint256 tokenId` from an account. At any time, an
   ///  ABT receiver must be able to disassociate themselves from an ABT
   ///  publicly through calling this function. After successfully executing this
@@ -1616,11 +1616,7 @@ abstract contract ERC4973 is EIP712, ERC721URIStorage, IERC4973 {
     address passive,
     bytes calldata metadata,
     bytes calldata signature
-  )
-    internal
-    virtual
-    returns (uint256)
-  {
+  ) internal virtual returns (uint256) {
     bytes32 hash = _getHash(active, passive, metadata);
     uint256 tokenId = uint256(hash);
 
@@ -1637,8 +1633,9 @@ abstract contract ERC4973 is EIP712, ERC721URIStorage, IERC4973 {
     view
     returns (bytes32)
   {
-    bytes32 structHash =
-      keccak256(abi.encode(AGREEMENT_HASH, active, passive, keccak256(metadata)));
+    bytes32 structHash = keccak256(
+      abi.encode(AGREEMENT_HASH, active, passive, keccak256(metadata))
+    );
     return _hashTypedDataV4(structHash);
   }
 }
