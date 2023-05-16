@@ -63,7 +63,7 @@ abstract contract ERC4973 is EIP712, ERC721URIStorage, IERC4973 {
     string memory uri = decodeURI(metadata);
     _safeMint(msg.sender, tokenId);
     _setTokenURI(tokenId, uri);
-    transferFrom(msg.sender, to, tokenId);
+    _transfer(msg.sender, to, tokenId);
     _usedHashes.set(tokenId);
     return tokenId;
   }
