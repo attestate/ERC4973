@@ -358,4 +358,37 @@ contract ERC4973Test is Test, ERC721Holder {
     vm.expectRevert(bytes("take: cannot take from self"));
     aa.take(address(abt), from, bytes(tokenURI), signature);
   }
+
+  function testTryTransferFromABT() public {
+    address to = address(approver);
+    bytes memory signature;
+
+    uint256 tokenId = abt.give(to, bytes(tokenURI), signature);
+
+    vm.prank(to);
+    vm.expectRevert(bytes("Not implemented"));
+    abt.transferFrom(to, address(abt), tokenId);
+  }
+
+  function testTrySafeTransferFromABT() public {
+    address to = address(approver);
+    bytes memory signature;
+
+    uint256 tokenId = abt.give(to, bytes(tokenURI), signature);
+
+    vm.prank(to);
+    vm.expectRevert(bytes("Not implemented"));
+    abt.safeTransferFrom(to, address(abt), tokenId);
+  }
+
+  function testTrySafeTransferFromWithDataABT() public {
+    address to = address(approver);
+    bytes memory signature;
+
+    uint256 tokenId = abt.give(to, bytes(tokenURI), signature);
+
+    vm.prank(to);
+    vm.expectRevert(bytes("Not implemented"));
+    abt.safeTransferFrom(to, address(abt), tokenId, "");
+  }
 }

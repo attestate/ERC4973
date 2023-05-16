@@ -63,7 +63,7 @@ abstract contract ERC4973 is EIP712, ERC721URIStorage, IERC4973 {
     string memory uri = decodeURI(metadata);
     _safeMint(msg.sender, tokenId);
     _setTokenURI(tokenId, uri);
-    transferFrom(msg.sender, to, tokenId);
+    _transfer(msg.sender, to, tokenId);
     _usedHashes.set(tokenId);
     return tokenId;
   }
@@ -109,5 +109,23 @@ abstract contract ERC4973 is EIP712, ERC721URIStorage, IERC4973 {
       abi.encode(AGREEMENT_HASH, active, passive, keccak256(metadata))
     );
     return _hashTypedDataV4(structHash);
+  }
+
+  // Block the ERC721 transfers
+
+  function transferFrom(address, address, uint256) public virtual override {
+    revert("Not implemented");
+  }
+
+  function safeTransferFrom(address, address, uint256) public virtual override {
+    revert("Not implemented");
+  }
+
+  function safeTransferFrom(address, address, uint256, bytes memory)
+    public
+    virtual
+    override
+  {
+    revert("Not implemented");
   }
 }
