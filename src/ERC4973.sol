@@ -110,4 +110,31 @@ abstract contract ERC4973 is EIP712, ERC721URIStorage, IERC4973 {
     );
     return _hashTypedDataV4(structHash);
   }
+
+  // Block the ERC721 transfers
+
+  function transferFrom(
+    address,
+    address,
+    uint256
+  ) public virtual override {
+    revert("Not implemented");
+  }
+
+  function safeTransferFrom(
+    address,
+    address,
+    uint256
+  ) public virtual override {
+    revert("Not implemented");
+  }
+
+  function safeTransferFrom(
+    address,
+    address,
+    uint256,
+    bytes memory
+  ) public virtual override {
+    revert("Not implemented");
+  }
 }
